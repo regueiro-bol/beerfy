@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
+import { getPublishedCities } from '@/lib/supabase/queries'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cities = await getPublishedCities()
+
   return (
     <div className="space-y-12">
       <section className="space-y-4 text-center py-8">
@@ -15,30 +18,20 @@ export default function HomePage() {
       </section>
 
       <section className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Ourense</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Próximamente...</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Vigo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Próximamente...</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Madrid</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Próximamente...</p>
-          </CardContent>
-        </Card>
+        {cities.map((city) => (
+          <Link key={city.id} href={`/${city.slug}`} className="block group">
+            <Card className="h-full transition-shadow duration-200 group-hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors duration-200">
+                  {city.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Ver locales disponibles</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </section>
 
       <section className="space-y-6 max-w-2xl mx-auto border-t pt-8">
@@ -51,7 +44,7 @@ export default function HomePage() {
       </section>
 
       <section className="text-center py-8">
-        <Link href="/sugerir" className={buttonVariants({ size: "lg" })}>
+        <Link href="/sugerir" className={buttonVariants({ size: 'lg' })}>
           Sugerir un bar
         </Link>
       </section>
