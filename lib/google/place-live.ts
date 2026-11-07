@@ -174,3 +174,46 @@ export async function getPlaceLocation(placeId: string): Promise<{ lat: number; 
   const p = (await res.json()) as { location?: { latitude: number; longitude: number } }
   return p.location ? { lat: p.location.latitude, lng: p.location.longitude } : null
 }
+
+/**
+ * Foto de portada de Google para las tarjetas (2 llamadas: detalles con solo `photos` + la foto).
+ * No se guarda: se pide al pintar la página.
+ */
+export async function getPlaceCover(placeId: string | null, maxWidthPx = 900): Promise<LivePhoto | null> {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY
+  if (!placeId || !apiKey) return null
+  try {
+    const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+      headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': 'photos' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(3500),
+    })
+    if (!res.ok) return null
+    const p = (await res.json()) as Pick<Resp, 'photos'>
+    const ph = p.photos?.[0]
+    if (!ph) return null
+    const url = await resolvePhoto(ph.name, apiKey, maxWidthPx)
+    if (!url) return null
+    return { url, author: ph.authorAttributions?.[0]?.displayName ?? null, authorUri: ph.authorAttributions?.[0]?.uri ?? null }
+  } catch {
+    return null
+  }
+}
+
+/** Portadas para una lista de bares: la foto propia si existe; si no, la de Google. */
+export async function getCovers(
+  venues: Array<{ id: string; cover_image_url: string | null; google_place_id: string | null }>
+): Promise<Record<string, { url: string; google: LivePhoto | null } | null>> {
+  const out: Record<string, { url: string; google: LivePhoto | null } | null> = {}
+  await Promise.all(
+    venues.map(async (v) => {
+      if (v.cover_image_url) {
+        out[v.id] = { url: v.cover_image_url, google: null }
+        return
+      }
+      const g = await getPlaceCover(v.google_place_id)
+      out[v.id] = g ? { url: g.url, google: g } : null
+    })
+  )
+  return out
+}

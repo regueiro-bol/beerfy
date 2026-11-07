@@ -8,6 +8,7 @@ import { VenueCard } from '@/components/site/venue-card'
 import { IMG } from '@/lib/content/images'
 import { CHAPTERS, getChapter } from '@/lib/content/bodega'
 import { getRankedVenues } from '@/lib/supabase/queries'
+import { getCovers } from '@/lib/google/place-live'
 import { getBreadcrumbSchema } from '@/lib/seo/schema'
 import { SITE_URL } from '@/lib/site'
 
@@ -16,6 +17,9 @@ const APP_URL = SITE_URL
 interface PageProps {
   params: Promise<{ slug: string }>
 }
+
+// Dinámica: las fotos de Google de las tarjetas no se pueden guardar en el HTML estático.
+export const dynamic = 'force-dynamic'
 
 export function generateStaticParams() {
   return CHAPTERS.map((c) => ({ slug: c.slug }))
@@ -42,6 +46,7 @@ export default async function ChapterPage({ params }: PageProps) {
   const prev = CHAPTERS[idx - 1]
   const next = CHAPTERS[idx + 1]
   const venues = await getRankedVenues(3)
+  const covers = await getCovers(venues)
 
   const schema = {
     '@context': 'https://schema.org',
@@ -171,7 +176,8 @@ export default async function ChapterPage({ params }: PageProps) {
                   href={`/${v.cities?.slug}/${v.slug}`}
                   name={v.name}
                   place={[v.cities?.name, v.district].filter(Boolean).join(' · ')}
-                  coverUrl={v.cover_image_url}
+                  coverUrl={covers[v.id]?.url ?? null}
+                  coverCredit={covers[v.id]?.google ?? null}
                   score={v.score}
                   votes={v.votes}
                   servesBodega={v.serves_eg_bodega}

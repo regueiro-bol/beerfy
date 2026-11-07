@@ -6,6 +6,8 @@ type Props = {
   name: string
   place: string
   coverUrl: string | null
+  /** Autor de la foto cuando viene de Google Maps (obligatorio mostrarlo). */
+  coverCredit?: { author: string | null; authorUri: string | null } | null
   score: number | null
   votes: number
   rank?: number
@@ -16,15 +18,16 @@ type Props = {
 /**
  * Tarjeta de local. Sin foto real se muestra un marcador honesto (nunca imágenes IA de un bar real).
  */
-export function VenueCard({ href, name, place, coverUrl, score, votes, rank, servesBodega = true, tall = true }: Props) {
+export function VenueCard({ href, name, place, coverUrl, coverCredit, score, votes, rank, servesBodega = true, tall = true }: Props) {
   return (
+    <div className="relative">
     <Link
       href={href}
       className={`group relative block overflow-hidden rounded-[32px] bg-[#1C1812] ${tall ? 'h-[460px] md:h-[520px]' : 'h-[340px]'}`}
     >
       {coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={coverUrl} alt={`Foto de ${name}`} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+        <img src={coverUrl} alt={`Foto de ${name}`} loading="lazy" referrerPolicy="no-referrer" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_70%_30%,#3A2A12,#1C1812_65%)]">
           <svg width="120" height="160" viewBox="0 0 120 160" aria-hidden="true" className="opacity-60">
@@ -55,5 +58,17 @@ export function VenueCard({ href, name, place, coverUrl, score, votes, rank, ser
         </div>
       </div>
     </Link>
+    {coverCredit && (
+      <p className="pointer-events-auto absolute right-6 top-[88px] max-w-[60%] truncate text-right text-[10px] text-sand/90 [text-shadow:0_1px_2px_rgba(0,0,0,.7)]">
+        Foto:{' '}
+        {coverCredit.authorUri ? (
+          <a href={coverCredit.authorUri} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+            {coverCredit.author ?? 'usuario de Google'}
+          </a>
+        ) : (coverCredit.author ?? 'usuario de Google')}{' '}
+        · <span translate="no">Google Maps</span>
+      </p>
+    )}
+    </div>
   )
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getCovers } from '@/lib/google/place-live'
 import Image from 'next/image'
 import { getCityBySlug, getPublishedVenuesForCity, getVenueScores } from '@/lib/supabase/queries'
 import { getCityPlaceSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
@@ -42,6 +43,8 @@ export default async function CityDetailPage({ params }: PageProps) {
   const venues = await getPublishedVenuesForCity(city.id)
   const scores = await getVenueScores(venues.map((v) => v.id))
   const sorted = [...venues].sort((a, b) => (scores[b.id]?.score ?? -1) - (scores[a.id]?.score ?? -1))
+  // Portadas de Google solo para las 12 primeras tarjetas (cada una son 2 llamadas facturables).
+  const covers = await getCovers(sorted.slice(0, 12))
   const schema = getCityPlaceSchema(city)
   const mapCenter = {
     lat: city.latitude ? Number(city.latitude) : 42.3358,
@@ -100,7 +103,8 @@ export default async function CityDetailPage({ params }: PageProps) {
                   href={`/${city.slug}/${v.slug}`}
                   name={v.name}
                   place={v.district || v.address || city.name}
-                  coverUrl={v.cover_image_url}
+                  coverUrl={covers[v.id]?.url ?? null}
+                  coverCredit={covers[v.id]?.google ?? null}
                   score={scores[v.id]?.score ?? null}
                   votes={scores[v.id]?.votes ?? 0}
                   servesBodega={v.serves_eg_bodega}
