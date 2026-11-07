@@ -1,6 +1,7 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import { autoValidateSuggestion } from '@/lib/venues/auto-validate'
 
 export type SuggestState = { ok: boolean; error?: string }
 
@@ -25,8 +26,8 @@ export async function submitSuggestion(_prev: SuggestState, formData: FormData):
     return { ok: false, error: 'Para avisarte necesitamos un email válido.' }
   }
 
-  const supabase = await createClient()
-  const { error } = await supabase.from('venue_suggestions').insert({
+  const supabase = createServiceClient()
+  const { data: inserted, error } = await supabase.from('venue_suggestions').insert({
     venue_name: venueName,
     city_id: cityId && cityId !== 'otra' ? cityId : null,
     city_name_freetext: cityId === 'otra' || !cityId ? cityFree : null,
@@ -35,11 +36,17 @@ export async function submitSuggestion(_prev: SuggestState, formData: FormData):
     // Solo guardamos el email si la persona pide expresamente que la avisemos.
     submitter_email: notify ? email : null,
     notify_when_published: notify,
-  })
+  }).select('id').single()
 
   if (error) {
     console.error('Error saving suggestion:', error)
     return { ok: false, error: 'No hemos podido guardar la sugerencia. Inténtalo de nuevo en un momento.' }
+  }
+  // Validación automática contra Google (si la coincidencia es clara, se publica al momento).
+  try {
+    if (inserted?.id) await autoValidateSuggestion(inserted.id)
+  } catch (e) {
+    console.error('Auto-validation failed:', e)
   }
   return { ok: true }
 }
