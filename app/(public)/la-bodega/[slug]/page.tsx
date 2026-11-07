@@ -7,6 +7,7 @@ import { VenueCard } from '@/components/site/venue-card'
 import { IMG } from '@/lib/content/images'
 import { CHAPTERS, getChapter } from '@/lib/content/bodega'
 import { getRankedVenues } from '@/lib/supabase/queries'
+import { getBreadcrumbSchema } from '@/lib/seo/schema'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
 
@@ -54,6 +55,12 @@ export default async function ChapterPage({ params }: PageProps) {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(getBreadcrumbSchema([{ name: 'La Bodega', path: '/la-bodega' }, { name: c.title, path: `/la-bodega/${c.slug}` }])),
+        }}
+      />
       <SiteHeader current="/la-bodega" />
 
       <article>
