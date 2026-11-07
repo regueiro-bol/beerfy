@@ -61,5 +61,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...venueUrls,
     { url: `${base}/sugerir`, lastModified: new Date(), priority: 0.5 },
     { url: `${base}/sobre-beerfy`, lastModified: new Date(), priority: 0.5 },
+    { url: `${base}/como-puntuamos`, lastModified: new Date(), priority: 0.4 },
   ]
 }

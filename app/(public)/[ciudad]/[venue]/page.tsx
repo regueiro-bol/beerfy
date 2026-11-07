@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getVenueBySlugs, getVenueScores, getVenueCriteria, getVenueBeers, timeAgo } from '@/lib/supabase/queries'
+import { getVenueBySlugs, getVenueScores, getVenueCriteria, getVenueBeers, timeAgo, MIN_VOTES } from '@/lib/supabase/queries'
 import { getLivePlace } from '@/lib/google/place-live'
 import { formatScore } from '@/components/site/chrome'
 import { getVenueBarOrPubSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
@@ -126,7 +126,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
           <div className="rotate-3 rounded-3xl bg-amber p-1 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.6)]">
             <ScoreBadge score={score} size="lg" />
             <p className="px-3 pb-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] text-ink">
-              {votes > 0 ? `Nota de tirada · ${votes} ${votes === 1 ? 'voto' : 'votos'}` : 'Sin puntuaciones aún'}
+              {score !== null ? `Nota de tirada · ${votes} votos` : votes > 0 ? `En calibración · ${votes} de ${MIN_VOTES} votos` : 'Sin puntuaciones aún'}
             </p>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
               <h2 className="font-display text-[32px] font-extrabold leading-none tracking-[-0.02em] md:text-[40px]">Cómo la tiran</h2>
               <span className="text-sm text-sand">{votes > 0 ? `${votes} ${votes === 1 ? 'puntuación' : 'puntuaciones'} de la comunidad` : 'Aún nadie la ha puntuado'}</span>
             </div>
-            {votes > 0 ? (
+            {score !== null ? (
               <div className="flex flex-col gap-4">
                 {CRIT.map((c) => (
                   <div key={c.name} className="flex flex-col gap-1.5">
@@ -189,7 +189,11 @@ export default async function VenueDetailPage({ params }: PageProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-sand">Sé el primero: temperatura, espuma, vaso y frescura en 30 segundos.</p>
+              <p className="text-sand">
+                {votes > 0
+                  ? `La nota se publica a partir de ${MIN_VOTES} puntuaciones hechas desde el bar. Faltan ${MIN_VOTES - votes}.`
+                  : 'Sé el primero: temperatura, espuma, vaso y frescura en 30 segundos, desde el propio bar.'}
+              </p>
             )}
             <Link href={ratePath} className="self-start rounded-2xl bg-amber px-6 py-4 text-[17px] font-extrabold text-ink transition hover:brightness-95">
               Puntuar mi tirada

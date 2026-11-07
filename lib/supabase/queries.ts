@@ -122,6 +122,9 @@ export type VenueScore = { score: number | null; votes: number }
 /**
  * Nota de tirada (0–10) por local, a partir de las valoraciones visibles (1–5 → ×2).
  */
+/** Votos mínimos para mostrar la Nota de tirada (antes, el bar está «en calibración»). */
+export const MIN_VOTES = 5
+
 export async function getVenueScores(venueIds: string[]): Promise<Record<string, VenueScore>> {
   const out: Record<string, VenueScore> = {}
   venueIds.forEach((id) => (out[id] = { score: null, votes: 0 }))
@@ -146,7 +149,7 @@ export async function getVenueScores(venueIds: string[]): Promise<Record<string,
     acc.n += 1
   }
   for (const [id, { s, n }] of Object.entries(sums)) {
-    out[id] = { score: (s / n) * 2, votes: n }
+    out[id] = { score: n >= MIN_VOTES ? (s / n) * 2 : null, votes: n }
   }
   return out
 }

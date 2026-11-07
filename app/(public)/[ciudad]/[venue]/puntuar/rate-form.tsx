@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useState } from 'react'
+import { useActionState, useRef, useState } from 'react'
 import { submitRating, type RateState } from './actions'
 
 const CRITERIA = [
@@ -17,7 +17,41 @@ type Key = (typeof CRITERIA)[number]['key']
 export function RateForm({ venueId, venueName, path }: { venueId: string; venueName: string; path: string }) {
   const [state, action, pending] = useActionState<RateState, FormData>(submitRating, { ok: false })
   const [v, setV] = useState<Record<Key, number>>({ score_temperature: 0, score_foam: 0, score_glass: 0, score_freshness: 0 })
+  const [geo, setGeo] = useState<'idle' | 'locating' | 'error'>('idle')
+  const [geoMsg, setGeoMsg] = useState('')
+  const formRef = useRef<HTMLFormElement>(null)
+  const latRef = useRef<HTMLInputElement>(null)
+  const lngRef = useRef<HTMLInputElement>(null)
+  const accRef = useRef<HTMLInputElement>(null)
   const done = Object.values(v).every((x) => x > 0)
+
+  function locateAndSubmit() {
+    if (!('geolocation' in navigator)) {
+      setGeo('error')
+      setGeoMsg('Tu navegador no permite comprobar la ubicación, así que no podemos verificar la nota.')
+      return
+    }
+    setGeo('locating')
+    setGeoMsg('')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (latRef.current) latRef.current.value = String(pos.coords.latitude)
+        if (lngRef.current) lngRef.current.value = String(pos.coords.longitude)
+        if (accRef.current) accRef.current.value = String(Math.round(pos.coords.accuracy))
+        setGeo('idle')
+        formRef.current?.requestSubmit()
+      },
+      (err) => {
+        setGeo('error')
+        setGeoMsg(
+          err.code === err.PERMISSION_DENIED
+            ? 'Sin permiso de ubicación no podemos comprobar que estás en el bar. Actívalo en los ajustes del navegador para esta web y vuelve a intentarlo.'
+            : 'No hemos podido obtener tu ubicación. Comprueba que el GPS está activado e inténtalo de nuevo.'
+        )
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    )
+  }
   const filled = Object.values(v).filter((x) => x > 0)
   const score = filled.length ? (filled.reduce((a, b) => a + b, 0) / filled.length) * 2 : 0
   const fillY = 132 - (98 * score) / 10
@@ -28,7 +62,8 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
       <div className="flex flex-col items-start gap-5 rounded-[32px] bg-bottle p-8 text-cream md:p-12">
         <p className="font-display text-[44px] font-extrabold leading-none">¡Gracias!</p>
         <p className="text-lg text-sand">
-          Tu nota para {venueName}: <strong className="text-amber">{state.score?.toFixed(1).replace('.', ',')}</strong>. Ya cuenta en la Nota de tirada.
+          Tu nota para {venueName}: <strong className="text-amber">{state.score?.toFixed(1).replace('.', ',')}</strong>.{' '}
+          {state.pending ? 'La revisaremos antes de publicarla.' : 'Ya cuenta en la Nota de tirada.'}
         </p>
         <Link href={path} className="rounded-full bg-amber px-6 py-3.5 font-bold text-ink">Volver a la ficha</Link>
       </div>
@@ -36,8 +71,11 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
   }
 
   return (
-    <form action={action} className="flex flex-col gap-8">
+    <form ref={formRef} action={action} className="flex flex-col gap-8">
       <input type="hidden" name="venue_id" value={venueId} />
+      <input ref={latRef} type="hidden" name="geo_lat" defaultValue="" />
+      <input ref={lngRef} type="hidden" name="geo_lng" defaultValue="" />
+      <input ref={accRef} type="hidden" name="geo_acc" defaultValue="" />
       <input type="hidden" name="path" value={path} />
       <div className="hidden" aria-hidden="true">
         <label>No rellenar<input name="website" tabIndex={-1} autoComplete="off" /></label>
@@ -103,18 +141,26 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
         <p className="text-xs text-stone">Se publica junto a tu nota, de forma anónima.</p>
       </div>
 
-      {state.error && (
+      {geo === 'error' && geoMsg && (
+        <p role="alert" className="rounded-2xl bg-[#FBE3DC] px-4 py-3 text-[15px] font-medium text-[#8A2A12]">{geoMsg}</p>
+      )}
+      {state.error && geo !== 'error' && (
         <p role="alert" className="rounded-2xl bg-[#FBE3DC] px-4 py-3 text-[15px] font-medium text-[#8A2A12]">{state.error}</p>
       )}
 
       <button
-        type="submit"
-        disabled={!done || pending}
+        type="button"
+        onClick={locateAndSubmit}
+        disabled={!done || pending || geo === 'locating'}
         className="h-[58px] rounded-[18px] bg-amber text-[17px] font-extrabold text-ink transition hover:brightness-95 disabled:opacity-50"
       >
-        {pending ? 'Enviando…' : done ? `Enviar mi nota · ${score.toFixed(1).replace('.', ',')}` : 'Puntúa los cuatro criterios'}
+        {geo === 'locating' ? 'Comprobando que estás en el bar…' : pending ? 'Enviando…' : done ? `Enviar mi nota · ${score.toFixed(1).replace('.', ',')}` : 'Puntúa los cuatro criterios'}
       </button>
-      <p className="text-xs text-stone">Sin registro. Una nota por bar y persona al día. Las notas que incumplan las normas pueden ocultarse.</p>
+      <p className="text-xs leading-relaxed text-stone">
+        Solo se puntúa desde el bar: al enviar te pediremos la ubicación para comprobar que estás allí. No la guardamos. Sin registro, una nota por bar y
+        persona al día.{' '}
+        <Link href="/como-puntuamos" className="underline underline-offset-2">Cómo funcionan las notas</Link>
+      </p>
     </form>
   )
 }
