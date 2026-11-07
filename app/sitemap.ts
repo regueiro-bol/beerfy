@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { CHAPTERS } from '@/lib/content/bodega'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: base, lastModified: new Date(), priority: 1 },
-    { url: `${base}/que-es-estrella-galicia-bodega`, lastModified: new Date(), priority: 0.9 },
+    { url: `${base}/la-bodega`, lastModified: new Date(), priority: 0.9 },
+    ...CHAPTERS.map((c) => ({ url: `${base}/la-bodega/${c.slug}`, lastModified: new Date(), priority: 0.8 })),
     { url: `${base}/ciudades`, lastModified: new Date(), priority: 0.8 },
     ...cityUrls,
     ...venueUrls,

@@ -5,11 +5,24 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Beerfy v2 — paleta de bodega */
+  --color-ink: #0D0B08;
+  --color-cream: #F6F1E4;
+  --color-paper: #FBFAF7;
+  --color-amber: #F2B33D;
+  --color-bottle: #134236;
+  --color-copper: #C8763A;
+  --color-stone: #5E5A50;
+  --color-sand: #D8CFBC;
+  --color-line: #E4E0D6;
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-heading: var(--font-bricolage), system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,8 +62,8 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: #FBFAF7;
+  --foreground: #16140F;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -127,4 +140,12 @@
   html {
     @apply font-sans;
   }
+}
+/* Beerfy v2 — animaciones */
+@keyframes bfy-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+@keyframes bfy-float { 0%, 100% { translate: 0 0 } 50% { translate: 0 -10px } }
+.bfy-marquee { animation: bfy-marquee 30s linear infinite }
+.bfy-float { animation: bfy-float 5s ease-in-out infinite }
+@media (prefers-reduced-motion: reduce) {
+  .bfy-marquee, .bfy-float { animation: none }
 }
