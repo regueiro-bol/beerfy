@@ -198,7 +198,11 @@ export default async function VenueDetailPage({ params }: PageProps) {
             <h2 className="mb-4 font-display text-[34px] font-extrabold tracking-[-0.02em]">Sobre este bar</h2>
             <p className="font-serif text-[21px] leading-relaxed text-[#26231C]">{venue.description || 'Descripción en preparación.'}</p>
             {venue.description && (
-              <p className="mt-3 text-xs text-stone">Descripción redactada con asistencia de IA y revisada por el equipo de Beerfy.</p>
+              <p className="mt-3 text-xs text-stone">
+                {venue.description_edited_by_human
+                  ? 'Descripción redactada con asistencia de IA y revisada por el equipo de Beerfy.'
+                  : 'Descripción redactada con asistencia de IA a partir de fuentes públicas; pendiente de revisión.'}
+              </p>
             )}
           </div>
           {(venue.latitude !== null || city.latitude !== null) && (
