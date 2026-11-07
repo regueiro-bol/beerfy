@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BrandMark, BrandTile } from '@/components/brand/mark'
+import { CookieSettingsLink } from '@/components/consent/cookie-banner'
 
 const NAV = [
   { href: '/ciudades', label: 'Ciudades' },
@@ -72,6 +73,7 @@ export function SiteFooter() {
             <Link href="/sobre-beerfy" className="hover:text-cream">Sobre Beerfy</Link>
             <Link href="/aviso-legal" className="hover:text-cream">Aviso legal</Link>
             <Link href="/privacidad" className="hover:text-cream">Privacidad</Link>
+            <CookieSettingsLink className="hover:text-cream" />
           </nav>
           <p>
             Beerfy es una guía independiente, sin afiliación con ninguna cervecera. Estrella Galicia es marca registrada de
