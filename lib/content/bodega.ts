@@ -15,6 +15,7 @@ export type Chapter = {
   lead: string
   summary: string[]
   sections: Array<{ id: string; title: string; body: string[] }>
+  sources?: Array<{ label: string; url: string }>
 }
 
 export const CHAPTERS: Chapter[] = [
@@ -170,55 +171,60 @@ export const CHAPTERS: Chapter[] = [
     slug: 'del-tanque-al-vaso',
     n: '05',
     title: 'Del tanque al vaso: cómo se tira una buena caña de bodega',
-    short: 'Vaso, ángulo, espuma y temperatura. Lo que tienes que mirar.',
+    short: 'Copa mojada, 45 grados, dos centímetros de crema y bien fría. Lo que tienes que mirar.',
     category: 'Degustación',
     image: 'hero',
     minutes: 6,
     lead: 'Una cerveza sin pasteurizar llega al grifo en su mejor momento. A partir de ahí, todo depende de quien la sirve.',
     summary: [
-      'Vaso limpio y enjuagado en agua fría justo antes de servir.',
-      'Tirada con el vaso inclinado, enderezando al final para formar la corona.',
-      'Unos dos dedos de espuma densa que aguante sin desplomarse.',
-      'Bien fría, pero no helada: que se note el sabor.',
+      'Copa limpia y mojada con agua fría justo antes de servir.',
+      'Se descarta el primer chorro y se llena con la copa inclinada a unos 45 grados, pegada al grifo.',
+      'Se corona con unos 2 cm de crema densa que haga de tapa.',
+      'Bien fría, pero no helada: las cerveceras recomiendan en torno a 4–5 ºC.',
     ],
     sections: [
       {
         id: 'vaso',
-        title: '1. El vaso',
+        title: '1. La copa',
         body: [
-          'Un vaso con restos de grasa o detergente mata la espuma antes de que nazca. La señal es fácil de ver: burbujas pegadas a las paredes y una corona que se deshace en segundos.',
-          'Lo ideal es un vaso limpio, frío y enjuagado con agua justo antes de servir. Secarlo con un trapo deja pelusa y grasa: mejor dejarlo escurrir.',
+          'Una copa con restos de grasa o detergente mata la espuma antes de que nazca. La señal es fácil de ver: burbujas pegadas a las paredes y una corona que se deshace en segundos.',
+          'Justo antes de servir, la copa se moja por dentro con agua fría; en muchos bares hay un grifo «mojacopas» para eso. Así se enfría, se arrastran las impurezas y la cerveza resbala mejor por el cristal. Secarla con un trapo deja pelusa y grasa: mejor dejarla escurrir.',
         ],
       },
       {
         id: 'tirada',
         title: '2. La tirada',
         body: [
-          'El vaso se coloca inclinado bajo el grifo, sin que este toque la cerveza, y se abre el grifo de una vez. A medida que se llena, se va enderezando para que al final se forme la corona de espuma.',
-          'Abrir el grifo a medias o tirar la primera espuma «para limpiar» son malas costumbres: desperdician cerveza y empeoran la textura.',
+          'Se abre el grifo y se deja ir el primer chorro, que suele salir con más gas o más templado. Después se acerca la copa a la salida del grifo, inclinada unos 45 grados, para que la cerveza se deslice por la pared en lugar de caer desde arriba.',
+          'Se llena de forma continua, sin movimientos bruscos ni dejar caer la cerveza desde lejos. Cuando faltan unos dos centímetros para el borde, se cierra el grifo y se retira la copa.',
         ],
       },
       {
         id: 'espuma',
-        title: '3. La espuma',
+        title: '3. La crema',
         body: [
-          'La espuma no es un adorno: protege la cerveza del aire y concentra los aromas. Una buena corona es densa, blanca y cremosa, de unos dos dedos, y al beber va dejando anillos de encaje en el vaso.',
+          'El último paso es la corona: con la copa ya derecha se completa con unos 2 cm de espuma densa y blanca. No es un adorno: hace de tapa para que la cerveza no se oxide y retiene el aroma.',
+          'Debajo de la crema queda una capa de gas, la «nube», que ayuda a conservar el sabor. Y si la espuma es buena, al beber va dejando en el cristal un aro por cada trago.',
         ],
       },
       {
         id: 'temperatura',
         title: '4. La temperatura',
         body: [
-          'Demasiado fría anestesia el paladar y esconde los matices; demasiado templada se vuelve plana. La cerveza de bodega se disfruta bien fría, pero no helada.',
+          'Demasiado fría anestesia el paladar y esconde los matices; demasiado templada se vuelve plana. Para la cerveza de bodega, las cerveceras suelen recomendar servirla entre 4 y 5 ºC: bien fría, pero no helada.',
         ],
       },
       {
         id: 'cata',
         title: '5. Cómo disfrutarla',
         body: [
-          'Mira el color y la espuma, acércate al vaso y bebe a tragos generosos, pasando la cerveza a través de la espuma. No la dejes calentar en la mano: una caña se bebe en su momento.',
+          'Mira el color y la espuma, acércate a la copa y bebe a tragos generosos, pasando la cerveza a través de la crema. Cuenta los aros que deja. No la dejes calentar en la mano: una caña se bebe en su momento.',
         ],
       },
+    ],
+    sources: [
+      { label: 'Mahou — El arte de tirar una cerveza', url: 'https://www.mahou.es/el-arte-de-tirar-una-cerveza/' },
+      { label: 'Estrella Galicia — Cerveza de Bodega (ficha de producto)', url: 'https://estrellagalicia.es/producto/estrella-galicia-cerveza-de-bodega/' },
     ],
   },
 ]
