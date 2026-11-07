@@ -7,6 +7,7 @@ export interface PlaceSearchResult {
     lng: number
   }
   primaryType?: string
+  googleMapsUri?: string
 }
 
 export interface PlaceDetails {
@@ -36,6 +37,7 @@ interface GooglePlacesSearchResponse {
     formattedAddress?: string
     location?: { latitude: number; longitude: number }
     primaryType?: string
+    googleMapsUri?: string
   }>
 }
 
@@ -71,7 +73,7 @@ export async function searchPlaces(query: string, cityName?: string): Promise<Pl
     headers: {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': apiKey,
-      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.primaryType,places.types',
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.primaryType,places.types,places.googleMapsUri',
     },
     body: JSON.stringify({
       textQuery: queryText,
@@ -96,6 +98,7 @@ export async function searchPlaces(query: string, cityName?: string): Promise<Pl
       lng: p.location?.longitude || 0,
     },
     primaryType: p.primaryType || undefined,
+    googleMapsUri: p.googleMapsUri || undefined,
   }))
 }
 
