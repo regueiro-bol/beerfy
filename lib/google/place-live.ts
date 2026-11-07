@@ -28,7 +28,7 @@ export type LivePhoto = {
 }
 
 /** Nº de fotos que se piden por ficha (cada una es una llamada facturable a Place Photos). */
-export const MAX_PHOTOS = 4
+export const MAX_PHOTOS = 1
 
 const FIELDS = [
   'currentOpeningHours.openNow',
@@ -117,7 +117,8 @@ async function resolvePhoto(name: string, apiKey: string, maxWidthPx: number): P
   }
 }
 
-export async function getLivePlace(placeId: string | null): Promise<LivePlace | null> {
+/** `withPhotos=false` cuando el bar ya tiene foto propia: se ahorra la llamada a Place Photos. */
+export async function getLivePlace(placeId: string | null, withPhotos = true): Promise<LivePlace | null> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY
   if (!placeId || !apiKey) return null
 
@@ -132,8 +133,8 @@ export async function getLivePlace(placeId: string | null): Promise<LivePlace | 
       return null
     }
     const p = (await res.json()) as Resp
-    const picked = (p.photos ?? []).slice(0, MAX_PHOTOS)
-    const urls = await Promise.all(picked.map((ph, i) => resolvePhoto(ph.name, apiKey, i === 0 ? 1600 : 800)))
+    const picked = withPhotos ? (p.photos ?? []).slice(0, MAX_PHOTOS) : []
+    const urls = await Promise.all(picked.map((ph) => resolvePhoto(ph.name, apiKey, 1600)))
     const photos: LivePhoto[] = picked
       .map((ph, i) => ({
         url: urls[i] ?? '',

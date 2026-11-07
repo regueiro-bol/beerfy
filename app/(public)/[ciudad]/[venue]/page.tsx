@@ -39,7 +39,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
   const [scores, criteria, live, beers] = await Promise.all([
     getVenueScores([venue.id]),
     getVenueCriteria(venue.id),
-    getLivePlace(venue.google_place_id),
+    getLivePlace(venue.google_place_id, !venue.cover_image_url),
     getVenueBeers(venue.id),
   ])
   const { score, votes } = scores[venue.id] ?? { score: null, votes: 0 }
@@ -60,7 +60,6 @@ export default async function VenueDetailPage({ params }: PageProps) {
   const gPhotos = live?.photos ?? []
   const heroGoogle = !venue.cover_image_url && gPhotos.length > 0 ? gPhotos[0] : null
   const heroSrc = venue.cover_image_url ?? heroGoogle?.url ?? null
-  const gallery = venue.cover_image_url ? gPhotos.slice(0, 3) : gPhotos.slice(1, 4)
   const closed = live?.businessStatus && live.businessStatus !== 'OPERATIONAL' ? live.businessStatus : null
 
   return (
@@ -225,26 +224,6 @@ export default async function VenueDetailPage({ params }: PageProps) {
               </p>
             )}
           </div>
-          {gallery.length > 0 && (
-            <div>
-              <h2 className="mb-4 font-display text-[28px] font-extrabold">Fotos del local</h2>
-              <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
-                {gallery.map((ph) => (
-                  <li key={ph.url} className="flex flex-col gap-1.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={ph.url} alt={`Foto de ${venue.name}`} loading="lazy" referrerPolicy="no-referrer" className="aspect-[4/3] w-full rounded-2xl object-cover" />
-                    <span className="text-[11px] text-stone">
-                      Foto:{' '}
-                      {ph.authorUri ? (
-                        <a href={ph.authorUri} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{ph.author ?? 'usuario de Google'}</a>
-                      ) : (ph.author ?? 'usuario de Google')}{' '}
-                      · <span translate="no">Google Maps</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
           {(venue.latitude !== null || city.latitude !== null) && (
             <div className="overflow-hidden rounded-[28px]">
               <CityMap venues={[venue]} center={mapCenter} citySlug={city.slug} zoom={16} />
@@ -256,7 +235,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
           <div className="flex flex-col gap-4 rounded-[28px] bg-ink p-7 text-cream">
             <h2 className="font-display text-2xl font-extrabold">Cómo llegar</h2>
             {venue.address && (
-              <p className="flex gap-3 text-[15px]"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{venue.address}</p>
+              <p className="flex gap-3 text-[15px]"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{venue.address.replace(/,\s*(Spain|España)$/i, '')}</p>
             )}
             {phone && (
               <a href={`tel:${phone}`} className="flex gap-3 text-[15px] hover:underline"><Phone className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{phone}</a>
@@ -277,13 +256,10 @@ export default async function VenueDetailPage({ params }: PageProps) {
               </a>
             )}
           </div>
-          {live && (live.features.length > 0 || live.priceLevel) && (
+          {live && live.features.length > 0 && (
             <div className="rounded-[28px] border-[1.5px] border-line bg-white p-7">
               <h2 className="mb-4 font-display text-2xl font-extrabold">El local</h2>
               <ul className="flex flex-wrap gap-2">
-                {live.priceLevel && (
-                  <li className="rounded-full bg-amber px-3.5 py-1.5 text-sm font-bold text-ink" aria-label={`Nivel de precio ${live.priceLevel.length} de 4`}>{live.priceLevel}</li>
-                )}
                 {live.features.map((f) => (
                   <li key={f} className="rounded-full bg-cream px-3.5 py-1.5 text-sm font-semibold text-[#26231C]">{f}</li>
                 ))}
