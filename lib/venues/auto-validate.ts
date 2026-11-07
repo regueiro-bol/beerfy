@@ -191,8 +191,23 @@ export async function publishProvisional(suggestionId: string): Promise<AutoResu
   if (!s || s.status !== 'pending' || !s.city_id) return { id: suggestionId, name: s?.venue_name ?? '?', result: 'pending', detail: 'No apta' }
   const city = s.cities as unknown as { name: string; slug: string }
   const slug = slugify(s.venue_name)
-  const { data: exists } = await supabase.from('venues').select('id').eq('city_id', s.city_id).eq('slug', slug).maybeSingle()
-  if (exists) return { id: s.id, name: s.venue_name, result: 'duplicate', detail: 'Ya publicada', url: `/${city.slug}/${slug}` }
+  const { data: exists } = await supabase
+    .from('venues')
+    .select('id, latitude, google_place_id')
+    .eq('city_id', s.city_id)
+    .eq('slug', slug)
+    .maybeSingle()
+  if (exists) {
+    // Ficha provisional sin coordenadas: reintenta la geocodificación.
+    if (exists.latitude === null && !exists.google_place_id && s.address) {
+      const g = await geocodeAddress(s.address)
+      if (g) {
+        await supabase.from('venues').update({ latitude: g.lat, longitude: g.lng, coords_updated_at: new Date().toISOString() }).eq('id', exists.id)
+        return { id: s.id, name: s.venue_name, result: 'published', detail: `geocodificada: ${g.lat.toFixed(5)},${g.lng.toFixed(5)} · ${g.label}`, url: `/${city.slug}/${slug}` }
+      }
+    }
+    return { id: s.id, name: s.venue_name, result: 'duplicate', detail: 'Ya publicada', url: `/${city.slug}/${slug}` }
+  }
 
   const geo = s.address ? await geocodeAddress(s.address) : null
   const now = new Date().toISOString()
