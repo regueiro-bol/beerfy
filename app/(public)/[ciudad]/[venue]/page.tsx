@@ -7,6 +7,7 @@ import { formatScore } from '@/components/site/chrome'
 import { getVenueBarOrPubSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
 import { SiteHeader, FoamEdge, ScoreBadge } from '@/components/site/chrome'
 import CityMap from '@/components/feature/city-map/CityMap'
+import { RateSticky } from '@/components/mobile/rate-sticky'
 import { MapPin, Phone, Globe, Clock } from 'lucide-react'
 import { SITE_URL } from '@/lib/site'
 
@@ -321,6 +322,12 @@ export default async function VenueDetailPage({ params }: PageProps) {
           )}
         </aside>
       </section>
+      <RateSticky
+        venueName={venue.name}
+        lat={venue.latitude !== null ? Number(venue.latitude) : null}
+        lng={venue.longitude !== null ? Number(venue.longitude) : null}
+        href={ratePath}
+      />
     </main>
   )
 }

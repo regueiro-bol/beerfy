@@ -4,7 +4,9 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Beerfy — La guía de la cerveza de bodega',
     short_name: 'Beerfy',
     description: 'Bares con cerveza de bodega (sin pasteurizar, de tanque) y cómo la tiran.',
+    id: '/',
     start_url: '/',
+    scope: '/',
     display: 'standalone',
     background_color: '#0D0B08',
     theme_color: '#0D0B08',
@@ -12,6 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     icons: [
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   }
 }
