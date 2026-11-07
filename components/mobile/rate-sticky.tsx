@@ -38,7 +38,7 @@ export function RateSticky({ venueName, lat, lng, href }: { venueName: string; l
   useEffect(() => {
     if (!show) return
     const prev = document.body.style.paddingBottom
-    document.body.style.paddingBottom = '96px'
+    document.body.style.paddingBottom = '80px'
     return () => {
       document.body.style.paddingBottom = prev
     }
@@ -47,7 +47,7 @@ export function RateSticky({ venueName, lat, lng, href }: { venueName: string; l
   if (!show) return null
   return (
     <>
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-30 border-t border-line bg-paper/95 px-4 pb-3 pt-3 backdrop-blur">
         <Link
           href={href}
           className="flex h-14 w-full items-center justify-center rounded-2xl bg-amber px-4 text-center text-[16px] font-extrabold text-ink"

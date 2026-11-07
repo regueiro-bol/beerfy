@@ -89,6 +89,18 @@ export function NearMe({ venues }: { venues: NearVenue[] }) {
   const nearest = sorted[0]
   return (
     <div className="flex flex-col gap-6">
+      {nearest && nearest.d <= 200 && (
+        <Link
+          href={`/${nearest.citySlug}/${nearest.venue.slug}/puntuar`}
+          className="flex items-center justify-between gap-4 rounded-[24px] bg-amber px-5 py-4 text-ink"
+        >
+          <span>
+            <span className="block text-sm font-semibold">Estás en {nearest.venue.name}</span>
+            <span className="block font-display text-2xl font-extrabold leading-tight">Puntúa tu caña</span>
+          </span>
+          <span aria-hidden="true" className="text-3xl font-extrabold">→</span>
+        </Link>
+      )}
       {nearest && nearest.d > 25000 && (
         <p className="rounded-2xl bg-[#F3EEE2] px-4 py-3 text-[15px]">
           Aún no tenemos bares cerca de ti: el más próximo está a {formatDistance(nearest.d)}.{' '}

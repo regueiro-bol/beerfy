@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   openGraph: { type: 'website', locale: 'es_ES', siteName: 'Beerfy', images: ['/og-default.jpg'] },
   twitter: { card: 'summary_large_image', images: ['/og-default.jpg'] },
   robots: { index: true, follow: true },
+  appleWebApp: { capable: true, title: 'Beerfy', statusBarStyle: 'black' },
+  formatDetection: { telephone: false },
 }
 
 export const viewport: Viewport = {
