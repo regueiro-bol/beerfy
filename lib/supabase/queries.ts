@@ -102,6 +102,20 @@ export async function getPublishedVenues(): Promise<Array<Venue & { cities: { sl
   return (data || []) as unknown as Array<Venue & { cities: { slug: string } | null }>
 }
 
+type RatingRow = {
+  rating: number
+  score_temperature: number | null
+  score_foam: number | null
+  score_glass: number | null
+  score_freshness: number | null
+}
+
+/** Nota 1–5 de una valoración: media exacta de los 4 criterios si existen; si no, la nota global antigua. */
+function ratingValue(r: RatingRow) {
+  const c = [r.score_temperature, r.score_foam, r.score_glass, r.score_freshness]
+  return c.every((v): v is number => typeof v === 'number') ? c.reduce((a, b) => a + b, 0) / 4 : r.rating
+}
+
 export type VenueWithCity = Venue & { cities: { slug: string; name: string } | null }
 export type VenueScore = { score: number | null; votes: number }
 
@@ -116,7 +130,7 @@ export async function getVenueScores(venueIds: string[]): Promise<Record<string,
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('ratings')
-    .select('venue_id, rating')
+    .select('venue_id, rating, score_temperature, score_foam, score_glass, score_freshness')
     .in('venue_id', venueIds)
     .eq('status', 'visible')
 
@@ -126,9 +140,9 @@ export async function getVenueScores(venueIds: string[]): Promise<Record<string,
   }
 
   const sums: Record<string, { s: number; n: number }> = {}
-  for (const r of (data || []) as Array<{ venue_id: string; rating: number }>) {
+  for (const r of (data || []) as Array<{ venue_id: string } & RatingRow>) {
     const acc = (sums[r.venue_id] ??= { s: 0, n: 0 })
-    acc.s += r.rating
+    acc.s += ratingValue(r)
     acc.n += 1
   }
   for (const [id, { s, n }] of Object.entries(sums)) {
@@ -221,6 +235,6 @@ export async function getVenueCriteria(venueId: string): Promise<CriteriaBreakdo
     comments: rows
       .filter((r) => r.comment)
       .slice(0, 5)
-      .map((r) => ({ comment: r.comment as string, score: r.rating * 2, created_at: r.created_at })),
+      .map((r) => ({ comment: r.comment as string, score: ratingValue(r) * 2, created_at: r.created_at })),
   }
 }
