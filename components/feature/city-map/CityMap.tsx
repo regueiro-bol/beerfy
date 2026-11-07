@@ -12,6 +12,9 @@ interface CityMapProps {
   citySlug: string
 }
 
+const esc = (t: string) =>
+  t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string)
+
 export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
@@ -44,6 +47,13 @@ export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMap
         })
 
         const infoWindow = new google.maps.InfoWindow()
+        const bounds = new google.maps.LatLngBounds()
+        let placed = 0
+        const icon: google.maps.Icon = {
+          url: '/map/pin.svg',
+          scaledSize: new google.maps.Size(40, 51),
+          anchor: new google.maps.Point(20, 49),
+        }
 
         venues.forEach((venue) => {
           if (venue.latitude === null || venue.longitude === null) return
@@ -54,14 +64,17 @@ export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMap
             position,
             map,
             title: venue.name,
+            icon,
           })
+          bounds.extend(position)
+          placed++
 
           marker.addListener('click', () => {
             const contentString = `
               <div style="color: #000; padding: 4px; font-family: sans-serif; max-width: 220px;">
-                <h3 style="font-weight: 700; font-size: 14px; margin: 0 0 4px 0; line-height: 1.2;">${venue.name}</h3>
-                <p style="font-size: 11px; margin: 0 0 8px 0; color: #555;">${venue.address || ''}</p>
-                <a href="/${citySlug}/${venue.slug}" style="font-size: 12px; font-weight: 600; color: #ff9900; text-decoration: underline;">
+                <h3 style="font-weight: 700; font-size: 14px; margin: 0 0 4px 0; line-height: 1.2;">${esc(venue.name)}</h3>
+                <p style="font-size: 11px; margin: 0 0 8px 0; color: #555;">${esc(venue.address || '')}</p>
+                <a href="/${citySlug}/${venue.slug}" style="font-size: 12px; font-weight: 600; color: #134236; text-decoration: underline;">
                   Ver ficha del bar
                 </a>
               </div>
@@ -70,6 +83,14 @@ export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMap
             infoWindow.open(map, marker)
           })
         })
+
+        // Encuadra los bares si hay varios, sin acercarse demasiado
+        if (placed > 1) {
+          map.fitBounds(bounds, 64)
+          google.maps.event.addListenerOnce(map, 'idle', () => {
+            if ((map.getZoom() ?? zoom) > 16) map.setZoom(16)
+          })
+        }
 
         setMapLoaded(true)
       })
