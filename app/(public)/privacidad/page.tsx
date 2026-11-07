@@ -18,6 +18,13 @@ export default function PrivacyPage() {
         Beerfy usa las API de Google Maps (mapas, ubicación, horario y puntuación de los locales). Al usar estas funciones se aplica
         también la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Política de privacidad de Google</a>.
       </p>
+      <h2 id="cookies">Cookies y analítica</h2>
+      <p>
+        Solo usamos cookies técnicas imprescindibles y, si lo aceptas en el aviso de cookies, cookies de analítica de Google Analytics
+        (gestionadas con Google Tag Manager) para medir de forma agregada qué páginas se visitan. No usamos cookies de publicidad.
+        Puedes cambiar tu elección en cualquier momento desde el enlace «Cookies» del pie de página. Más información en la{' '}
+        <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer">política de cookies de Google</a>.
+      </p>
       <h2>Tus derechos</h2>
       <p>Puedes pedir acceso, rectificación o supresión de tus datos escribiendo a [email de contacto].</p>
     </LegalPage>
