@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getVenueBySlugs, getVenueScores, getVenueCriteria } from '@/lib/supabase/queries'
+import { getVenueBySlugs, getVenueScores, getVenueCriteria, getVenueBeers, timeAgo } from '@/lib/supabase/queries'
 import { getLivePlace } from '@/lib/google/place-live'
 import { formatScore } from '@/components/site/chrome'
 import { getVenueBarOrPubSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
@@ -35,10 +35,11 @@ export default async function VenueDetailPage({ params }: PageProps) {
 
   const { venue, city } = data
   const schema = getVenueBarOrPubSchema(venue, city)
-  const [scores, criteria, live] = await Promise.all([
+  const [scores, criteria, live, beers] = await Promise.all([
     getVenueScores([venue.id]),
     getVenueCriteria(venue.id),
     getLivePlace(venue.google_place_id),
+    getVenueBeers(venue.id),
   ])
   const { score, votes } = scores[venue.id] ?? { score: null, votes: 0 }
   const ratePath = `/${city.slug}/${venue.slug}/puntuar`
@@ -93,9 +94,11 @@ export default async function VenueDetailPage({ params }: PageProps) {
               {[venue.district, city.name].filter(Boolean).join(' · ')}
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {venue.serves_eg_bodega && (
-                <span className="rounded-full bg-bottle px-3.5 py-2 text-sm font-semibold">Estrella Galicia de Bodega en tanque</span>
-              )}
+              {beers.map((b) => (
+                <span key={b.id} className="rounded-full bg-bottle px-3.5 py-2 text-sm font-semibold">
+                  {b.name} en tanque
+                </span>
+              ))}
               {venue.highlights?.map((h) => (
                 <span key={h} className="rounded-full bg-cream/15 px-3.5 py-2 text-sm font-semibold backdrop-blur">{h}</span>
               ))}
@@ -113,6 +116,40 @@ export default async function VenueDetailPage({ params }: PageProps) {
 
       <section className="mx-auto flex max-w-[1320px] flex-wrap gap-10 px-5 pb-20 pt-6 md:px-8">
         <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-8">
+          {beers.length > 0 && (
+            <div>
+              <h2 className="mb-4 font-display text-[34px] font-extrabold tracking-[-0.02em]">En tanque</h2>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
+                {beers.map((b) => (
+                  <div key={b.id} className="relative flex flex-col gap-3 overflow-hidden rounded-[26px] border-[1.5px] border-[#16140F] bg-[#FFF8E6] p-6">
+                    <svg width="90" height="120" viewBox="0 0 30 40" aria-hidden="true" className="absolute -right-3 -top-3 opacity-25">
+                      <rect x="6" y="2" width="18" height="30" rx="9" fill="#C8763A" />
+                      <path d="M6 12h18M6 24h18" stroke="#8E4E22" strokeWidth="1.5" />
+                    </svg>
+                    <div className="flex flex-wrap gap-2">
+                      {b.unpasteurized && (
+                        <span className="rounded-full bg-bottle px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-cream">Sin pasteurizar</span>
+                      )}
+                      <span className="rounded-full bg-cream px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-ink">Tanque</span>
+                    </div>
+                    <div>
+                      <p className="font-display text-[26px] font-extrabold leading-tight">{b.name}</p>
+                      <p className="text-sm text-stone">
+                        {b.brewery}
+                        {b.style ? ` · ${b.style}` : ''}
+                      </p>
+                    </div>
+                    <p className="text-xs text-stone">
+                      {b.status === 'confirmada' ? 'Confirmada' : 'Por confirmar'}
+                      {b.last_confirmed_at ? ` ${timeAgo(b.last_confirmed_at)}` : ''}
+                      {b.source === 'equipo' ? ' por el equipo de Beerfy' : b.source === 'bar' ? ' por el propio bar' : ' por la comunidad'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-5 rounded-[32px] bg-ink p-7 text-cream md:p-9">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <h2 className="font-display text-[32px] font-extrabold leading-none tracking-[-0.02em] md:text-[40px]">Cómo la tiran</h2>

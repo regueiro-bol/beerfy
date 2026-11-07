@@ -45,6 +45,14 @@ function slugify(text: string) {
   return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 }
 
+
+/** Enlaza un bar a Estrella Galicia de Bodega en tanque (cerveza por defecto mientras el alta no pregunta la cerveza). */
+async function linkDefaultBeer(venueId: string) {
+  const supabase = createServiceClient()
+  const { data: beer } = await supabase.from('beers').select('id').eq('slug', 'estrella-galicia-de-bodega').maybeSingle()
+  if (beer) await supabase.from('venue_beers').upsert({ venue_id: venueId, beer_id: beer.id, source: 'equipo' }, { onConflict: 'venue_id,beer_id' })
+}
+
 /** Crea y publica un bar desde un place_id de Google. Devuelve el slug o null si ya existía. */
 export async function publishVenueFromPlace(opts: {
   cityId: string
@@ -93,7 +101,7 @@ export async function publishVenueFromPlace(opts: {
     slug = `${base}-${i}`
   }
   const now = new Date().toISOString()
-  const { error } = await supabase.from('venues').insert({
+  const { data: inserted, error } = await supabase.from('venues').insert({
     city_id: opts.cityId,
     slug,
     name: opts.name,
@@ -106,8 +114,9 @@ export async function publishVenueFromPlace(opts: {
     serves_eg_bodega: opts.servesBodega,
     status: 'published',
     published_at: now,
-  })
+  }).select('id').single()
   if (error) throw new Error(error.message)
+  if (opts.servesBodega && inserted) await linkDefaultBeer(inserted.id)
   return { created: true as const, slug }
 }
 
@@ -211,7 +220,7 @@ export async function publishProvisional(suggestionId: string): Promise<AutoResu
 
   const geo = s.address ? await geocodeAddress(s.address) : null
   const now = new Date().toISOString()
-  const { error } = await supabase.from('venues').insert({
+  const { data: inserted, error } = await supabase.from('venues').insert({
     city_id: s.city_id,
     slug,
     name: s.venue_name,
@@ -223,8 +232,9 @@ export async function publishProvisional(suggestionId: string): Promise<AutoResu
     serves_eg_bodega: true,
     status: 'published',
     published_at: now,
-  })
+  }).select('id').single()
   if (error) return { id: s.id, name: s.venue_name, result: 'pending', detail: error.message }
+  if (inserted) await linkDefaultBeer(inserted.id)
   await supabase
     .from('venue_suggestions')
     .update({ ai_notes: `Ficha provisional publicada (coordenadas OSM: ${geo ? geo.label : 'sin geocodificar'}). Pendiente de Google.` })
