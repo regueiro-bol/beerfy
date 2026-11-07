@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCityBySlug, getPublishedVenuesForCity, getVenueScores } from '@/lib/supabase/queries'
-import { getCityPlaceSchema } from '@/lib/seo/schema'
+import { getCityPlaceSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
 import { SiteHeader } from '@/components/site/chrome'
 import { VenueCard } from '@/components/site/venue-card'
 import { BAR_AMBIENCE } from '@/lib/content/images'
@@ -50,6 +50,12 @@ export default async function CityDetailPage({ params }: PageProps) {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(getBreadcrumbSchema([{ name: 'Ciudades', path: '/ciudades' }, { name: city.name, path: `/${city.slug}` }])),
+        }}
+      />
 
       <section className="relative overflow-hidden bg-ink text-cream">
         <Image src={BAR_AMBIENCE[2]} alt="" fill preload sizes="100vw" className="object-cover opacity-45" placeholder="blur" />

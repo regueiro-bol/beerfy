@@ -1,13 +1,14 @@
 import type { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Beerfy — Estrella Galicia de Bodega',
+    name: 'Beerfy — La guía de la cerveza de bodega',
     short_name: 'Beerfy',
-    description: 'Guía colaborativa de bares con Estrella Galicia de Bodega',
+    description: 'Bares con cerveza de bodega (sin pasteurizar, de tanque) y cómo la tiran.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#0f0f0f',
+    background_color: '#0D0B08',
+    theme_color: '#0D0B08',
+    lang: 'es',
     icons: [
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

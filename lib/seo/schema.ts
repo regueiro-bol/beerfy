@@ -60,3 +60,18 @@ export function getVenueBarOrPubSchema(venue: Venue, city: City) {
 
   return schema
 }
+
+/** BreadcrumbList para rich results y para que los LLM entiendan la jerarquía. */
+export function getBreadcrumbSchema(items: Array<{ name: string; path: string }>) {
+  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: it.name,
+      item: `${base}${it.path}`,
+    })),
+  }
+}

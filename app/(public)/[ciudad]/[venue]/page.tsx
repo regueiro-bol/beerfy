@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { getVenueBySlugs, getVenueScores, getVenueCriteria } from '@/lib/supabase/queries'
 import { getLivePlace } from '@/lib/google/place-live'
 import { formatScore } from '@/components/site/chrome'
-import { getVenueBarOrPubSchema } from '@/lib/seo/schema'
+import { getVenueBarOrPubSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
 import { SiteHeader, FoamEdge, ScoreBadge } from '@/components/site/chrome'
 import CityMap from '@/components/feature/city-map/CityMap'
 import { MapPin, Phone, Globe, Clock } from 'lucide-react'
@@ -59,6 +59,18 @@ export default async function VenueDetailPage({ params }: PageProps) {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            getBreadcrumbSchema([
+              { name: 'Ciudades', path: '/ciudades' },
+              { name: city.name, path: `/${city.slug}` },
+              { name: venue.name, path: `/${city.slug}/${venue.slug}` },
+            ])
+          ),
+        }}
+      />
 
       <section className="relative min-h-[560px] overflow-hidden bg-ink text-cream">
         {venue.cover_image_url ? (
