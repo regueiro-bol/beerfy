@@ -4,6 +4,7 @@ import './globals.css'
 import Script from 'next/script'
 import { SITE_URL, GTM_ID, CONSENT_KEY } from '@/lib/site'
 import { CookieBanner } from '@/components/consent/cookie-banner'
+import { RegisterSW } from '@/components/mobile/pwa'
 
 const APP_URL = SITE_URL
 
@@ -50,6 +51,7 @@ try{if(localStorage.getItem('${CONSENT_KEY}')==='granted'){gtag('consent','updat
         </noscript>
         {children}
         <CookieBanner />
+        <RegisterSW />
       </body>
     </html>
   )

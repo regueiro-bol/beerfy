@@ -10,12 +10,18 @@ interface CityMapProps {
   center: { lat: number; lng: number }
   zoom?: number
   citySlug: string
+  /** Enlace de cada bar (por defecto /{citySlug}/{slug}). */
+  venueHref?: (v: Venue) => string
+  /** Posición del usuario: se pinta un punto azul. */
+  me?: { lat: number; lng: number } | null
+  /** Encuadrar todos los bares (true) o respetar center/zoom (false). */
+  fit?: boolean
 }
 
 const esc = (t: string) =>
   t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string)
 
-export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMapProps) {
+export default function CityMap({ venues, center, zoom = 13, citySlug, venueHref, me = null, fit = true }: CityMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [error, setError] = useState('')
@@ -74,7 +80,7 @@ export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMap
               <div style="color: #000; padding: 4px; font-family: sans-serif; max-width: 220px;">
                 <h3 style="font-weight: 700; font-size: 14px; margin: 0 0 4px 0; line-height: 1.2;">${esc(venue.name)}</h3>
                 <p style="font-size: 11px; margin: 0 0 8px 0; color: #555;">${esc(venue.address || '')}</p>
-                <a href="/${citySlug}/${venue.slug}" style="font-size: 12px; font-weight: 600; color: #134236; text-decoration: underline;">
+                <a href="${venueHref ? venueHref(venue) : `/${citySlug}/${venue.slug}`}" style="font-size: 12px; font-weight: 600; color: #134236; text-decoration: underline;">
                   Ver ficha del bar
                 </a>
               </div>
@@ -85,7 +91,17 @@ export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMap
         })
 
         // Encuadra los bares si hay varios, sin acercarse demasiado
-        if (placed > 1) {
+        if (me) {
+          new google.maps.Marker({
+            position: me,
+            map,
+            title: 'Estás aquí',
+            zIndex: 999,
+            icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: '#2F6FED', fillOpacity: 1, strokeColor: '#FFFFFF', strokeWeight: 3 },
+          })
+        }
+
+        if (fit && placed > 1) {
           map.fitBounds(bounds, 64)
           google.maps.event.addListenerOnce(map, 'idle', () => {
             if ((map.getZoom() ?? zoom) > 16) map.setZoom(16)
@@ -98,7 +114,7 @@ export default function CityMap({ venues, center, zoom = 13, citySlug }: CityMap
         console.error('Google Maps loading error:', err)
         setError('Error al cargar Google Maps.')
       })
-  }, [venues, center, zoom, citySlug, apiKey])
+  }, [venues, center, zoom, citySlug, apiKey, venueHref, me, fit])
 
   if (!apiKey) {
     return (

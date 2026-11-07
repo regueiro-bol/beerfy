@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { InstallApp } from '@/components/mobile/pwa'
 import Image from 'next/image'
 import { getPublishedCities, getRankedVenues, getVenueCountsByCity } from '@/lib/supabase/queries'
 import { SiteHeader, Marquee } from '@/components/site/chrome'
@@ -71,6 +72,16 @@ export default async function HomePage() {
               >
                 Buscar por ciudad
               </Link>
+              <Link
+                href="/cerca"
+                className="flex items-center gap-2 rounded-2xl border border-amber/70 px-7 py-4 text-[17px] font-bold text-amber transition hover:bg-amber/10"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                  <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+                  <circle cx="12" cy="9.5" r="2.5" />
+                </svg>
+                Bares cerca de mí
+              </Link>
               <Link href="/la-bodega" className="rounded-2xl border border-cream/40 px-7 py-4 text-[17px] font-bold transition hover:bg-cream/10">
                 ¿Qué es la de bodega?
               </Link>
@@ -100,6 +111,7 @@ export default async function HomePage() {
           <div className="text-xs font-bold uppercase tracking-[0.08em]">Nota de tirada</div>
         </div>
       </section>
+      <InstallApp />
 
       {/* ESPUMA + CINTA */}
       <div className="relative h-[180px] bg-ink md:h-[260px]" aria-hidden="true">
