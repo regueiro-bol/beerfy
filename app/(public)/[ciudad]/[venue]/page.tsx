@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getVenueBySlugs } from '@/lib/supabase/queries'
+import { getVenueBySlugs, getVenueScores } from '@/lib/supabase/queries'
 import { getVenueBarOrPubSchema } from '@/lib/seo/schema'
-import { Card, CardContent } from '@/components/ui/card'
+import { SiteHeader, FoamEdge, ScoreBadge } from '@/components/site/chrome'
 import CityMap from '@/components/feature/city-map/CityMap'
-import { MapPin, Phone, Globe, Clock, Info } from 'lucide-react'
+import { MapPin, Phone, Globe, Clock } from 'lucide-react'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+
+export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ ciudad: string; venue: string }>
@@ -16,200 +18,135 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { ciudad, venue } = await params
   const data = await getVenueBySlugs(ciudad, venue)
-
-  if (!data) {
-    return {}
-  }
-
+  if (!data) return {}
   return {
-    title: `${data.venue.name} · ${data.city.name} | Estrella Galicia de Bodega`,
-    description: data.venue.description || `Ficha de ${data.venue.name} en ${data.city.name}`,
-    alternates: {
-      canonical: `${APP_URL}/${data.city.slug}/${data.venue.slug}`,
-    },
+    title: `${data.venue.name}, ${data.city.name}: cerveza de bodega`,
+    description: data.venue.description || `${data.venue.name} en ${data.city.name}: cómo tiran la cerveza de bodega.`,
+    alternates: { canonical: `${APP_URL}/${data.city.slug}/${data.venue.slug}` },
   }
 }
 
 export default async function VenueDetailPage({ params }: PageProps) {
   const { ciudad, venue: venueSlug } = await params
   const data = await getVenueBySlugs(ciudad, venueSlug)
-
-  if (!data) {
-    notFound()
-  }
+  if (!data) notFound()
 
   const { venue, city } = data
   const schema = getVenueBarOrPubSchema(venue, city)
-
-  // Map center coordinates
+  const { score, votes } = (await getVenueScores([venue.id]))[venue.id] ?? { score: null, votes: 0 }
   const mapCenter = {
     lat: venue.latitude ? Number(venue.latitude) : Number(city.latitude),
     lng: venue.longitude ? Number(venue.longitude) : Number(city.longitude),
   }
-
-  // Formatting hours
   const hours = venue.hours_json as { weekdayDescriptions?: string[] } | null
-  const weekdayDescriptions = hours?.weekdayDescriptions
+  const weekdays = hours?.weekdayDescriptions
 
   return (
-    <div className="space-y-8">
-      {/* Schema.org JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
+    <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
-      {/* Breadcrumbs */}
-      <div className="space-y-2">
-        <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-          <Link href="/ciudades" className="hover:underline transition-colors duration-150">
-            Ciudades
-          </Link>
-          <span>&gt;</span>
-          <Link href={`/${city.slug}`} className="hover:underline transition-colors duration-150">
-            {city.name}
-          </Link>
-          <span>&gt;</span>
-          <span className="font-medium text-foreground">{venue.name}</span>
-        </nav>
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-          {venue.name}
-        </h1>
-      </div>
-
-      <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
-        {/* Main Details (Col-span 2) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Main Photo if available */}
-          {venue.cover_image_url && (
-            <div className="relative aspect-video w-full rounded-lg overflow-hidden border bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={venue.cover_image_url}
-                alt={`Foto de ${venue.name}`}
-                className="object-cover w-full h-full"
-              />
+      <section className="relative min-h-[560px] overflow-hidden bg-ink text-cream">
+        {venue.cover_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={venue.cover_image_url} alt={`Foto de ${venue.name}`} className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,#4A3414,#0D0B08_60%)]" aria-hidden="true" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-ink/70" aria-hidden="true" />
+        <SiteHeader variant="overlay" />
+        <div className="relative mx-auto flex max-w-[1320px] flex-wrap items-end justify-between gap-8 px-5 pb-14 pt-24 md:px-8 md:pt-40">
+          <div className="max-w-[820px]">
+            <nav aria-label="Migas de pan" className="mb-5 flex flex-wrap gap-2 text-sm text-sand">
+              <Link href="/ciudades" className="underline-offset-4 hover:underline">Ciudades</Link>
+              <span aria-hidden="true">/</span>
+              <Link href={`/${city.slug}`} className="underline-offset-4 hover:underline">{city.name}</Link>
+            </nav>
+            <h1 className="font-display text-[52px] font-extrabold leading-[0.9] tracking-[-0.04em] md:text-[96px]">{venue.name}</h1>
+            <p className="mt-4 text-lg text-sand">
+              {[venue.district, city.name].filter(Boolean).join(' · ')}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {venue.serves_eg_bodega && (
+                <span className="rounded-full bg-bottle px-3.5 py-2 text-sm font-semibold">Estrella Galicia de Bodega en tanque</span>
+              )}
+              {venue.highlights?.map((h) => (
+                <span key={h} className="rounded-full bg-cream/15 px-3.5 py-2 text-sm font-semibold backdrop-blur">{h}</span>
+              ))}
             </div>
-          )}
-
-          {/* Description */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">Sobre este local</h2>
-            <p className="text-muted-foreground text-base leading-relaxed">
-              {venue.description || 'Sin descripción disponible.'}
+          </div>
+          <div className="rotate-3 rounded-3xl bg-amber p-1 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.6)]">
+            <ScoreBadge score={score} size="lg" />
+            <p className="px-3 pb-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] text-ink">
+              {votes > 0 ? `Nota de tirada · ${votes} votos` : 'Sin puntuaciones aún'}
             </p>
           </div>
+        </div>
+      </section>
+      <FoamEdge />
 
-          {/* Highlights */}
-          {venue.highlights && venue.highlights.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-base font-semibold">Destacados</h3>
-              <div className="flex flex-wrap gap-2">
-                {venue.highlights.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+      <section className="mx-auto flex max-w-[1320px] flex-wrap gap-10 px-5 pb-20 pt-6 md:px-8">
+        <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-8">
+          <div>
+            <h2 className="mb-4 font-display text-[34px] font-extrabold tracking-[-0.02em]">Sobre este bar</h2>
+            <p className="font-serif text-[21px] leading-relaxed text-[#26231C]">{venue.description || 'Descripción en preparación.'}</p>
+            {venue.description && (
+              <p className="mt-3 text-xs text-stone">Descripción redactada con asistencia de IA y revisada por el equipo de Beerfy.</p>
+            )}
+          </div>
+          {(venue.latitude !== null || city.latitude !== null) && (
+            <div className="overflow-hidden rounded-[28px]">
+              <CityMap venues={[venue]} center={mapCenter} citySlug={city.slug} zoom={16} />
             </div>
           )}
+        </div>
 
-          {/* Map Location */}
-          <div className="space-y-4 pt-4 border-t">
-            <h3 className="text-lg font-bold">Ubicación</h3>
-            <CityMap venues={[venue]} center={mapCenter} citySlug={city.slug} />
+        <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-5">
+          <div className="flex flex-col gap-4 rounded-[28px] bg-ink p-7 text-cream">
+            <h2 className="font-display text-2xl font-extrabold">Cómo llegar</h2>
+            {venue.address && (
+              <p className="flex gap-3 text-[15px]"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{venue.address}</p>
+            )}
+            {venue.phone && (
+              <a href={`tel:${venue.phone}`} className="flex gap-3 text-[15px] hover:underline"><Phone className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{venue.phone}</a>
+            )}
+            {venue.website && (
+              <a href={venue.website} target="_blank" rel="noopener noreferrer" className="flex gap-3 break-all text-[15px] hover:underline">
+                <Globe className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />Web del local
+              </a>
+            )}
+            {venue.latitude !== null && venue.longitude !== null && (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${venue.latitude},${venue.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 rounded-full bg-amber px-5 py-3.5 text-center font-bold text-ink"
+              >
+                Abrir en Google Maps
+              </a>
+            )}
           </div>
-        </div>
-
-        {/* Sidebar Info (Col-span 1) */}
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6 space-y-6">
-              <h3 className="font-bold text-lg">Información de Contacto</h3>
-              
-              <div className="space-y-4 text-sm">
-                {venue.address && (
-                  <div className="flex items-start space-x-3">
-                    <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Dirección</p>
-                      <p className="text-muted-foreground">{venue.address}</p>
-                      {venue.district && (
-                        <p className="text-xs text-muted-foreground mt-0.5">Barrio: {venue.district}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {venue.phone && (
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="font-medium">Teléfono</p>
-                      <a href={`tel:${venue.phone}`} className="text-primary hover:underline">
-                        {venue.phone}
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {venue.website && (
-                  <div className="flex items-center space-x-3">
-                    <Globe className="h-5 w-5 text-muted-foreground shrink-0" />
-                    <div>
-                      <p className="font-medium">Sitio Web</p>
-                      <a
-                        href={venue.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline break-all"
-                      >
-                        {venue.website}
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Opening Hours */}
-          {weekdayDescriptions && weekdayDescriptions.length > 0 && (
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h3 className="font-bold text-lg flex items-center">
-                  <Clock className="mr-2 h-5 w-5 text-muted-foreground" /> Horarios
-                </h3>
-                <ul className="space-y-2 text-sm">
-                  {weekdayDescriptions.map((dayDesc, index) => {
-                    const separatorIndex = dayDesc.indexOf(':')
-                    const day = dayDesc.substring(0, separatorIndex + 1)
-                    const hours = dayDesc.substring(separatorIndex + 1)
-
-                    return (
-                      <li key={index} className="flex justify-between border-b pb-1 last:border-0 last:pb-0">
-                        <span className="font-medium">{day}</span>
-                        <span className="text-muted-foreground text-right">{hours}</span>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </CardContent>
-            </Card>
+          {weekdays && weekdays.length > 0 && (
+            <div className="rounded-[28px] border-[1.5px] border-line bg-white p-7">
+              <h2 className="mb-4 flex items-center gap-2 font-display text-2xl font-extrabold"><Clock className="h-5 w-5 text-copper" aria-hidden="true" />Horario</h2>
+              <ul className="flex flex-col gap-2 text-sm">
+                {weekdays.map((d, i) => {
+                  const k = d.indexOf(':')
+                  return (
+                    <li key={i} className="flex justify-between gap-3 border-b border-line pb-1.5 last:border-0">
+                      <span className="font-medium capitalize">{d.substring(0, k)}</span>
+                      <span className="text-right text-stone">{d.substring(k + 1)}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* AI Disclaimer */}
-      <footer className="border-t pt-8 text-xs text-muted-foreground flex items-start space-x-2">
-        <Info className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
-        <p>
-          Datos extraídos de fuentes públicas. La descripción ha sido generada con asistencia de IA y revisada por nuestro equipo editorial.
-        </p>
-      </footer>
-    </div>
+          <div className="rounded-[28px] bg-[#F3EEE2] p-7">
+            <p className="font-display text-xl font-extrabold">Puntuar la tirada</p>
+            <p className="mt-2 text-sm text-stone">Muy pronto podrás puntuar temperatura, espuma, vaso y frescura en 30 segundos, sin registro.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
   )
 }

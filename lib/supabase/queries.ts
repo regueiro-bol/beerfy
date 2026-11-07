@@ -101,3 +101,75 @@ export async function getPublishedVenues(): Promise<Array<Venue & { cities: { sl
 
   return (data || []) as unknown as Array<Venue & { cities: { slug: string } | null }>
 }
+
+export type VenueWithCity = Venue & { cities: { slug: string; name: string } | null }
+export type VenueScore = { score: number | null; votes: number }
+
+/**
+ * Nota de tirada (0–10) por local, a partir de las valoraciones visibles (1–5 → ×2).
+ */
+export async function getVenueScores(venueIds: string[]): Promise<Record<string, VenueScore>> {
+  const out: Record<string, VenueScore> = {}
+  venueIds.forEach((id) => (out[id] = { score: null, votes: 0 }))
+  if (venueIds.length === 0) return out
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('ratings')
+    .select('venue_id, rating')
+    .in('venue_id', venueIds)
+    .eq('status', 'visible')
+
+  if (error) {
+    console.error('Error fetching ratings:', error)
+    return out
+  }
+
+  const sums: Record<string, { s: number; n: number }> = {}
+  for (const r of (data || []) as Array<{ venue_id: string; rating: number }>) {
+    const acc = (sums[r.venue_id] ??= { s: 0, n: 0 })
+    acc.s += r.rating
+    acc.n += 1
+  }
+  for (const [id, { s, n }] of Object.entries(sums)) {
+    out[id] = { score: (s / n) * 2, votes: n }
+  }
+  return out
+}
+
+/**
+ * Locales publicados con su nota, ordenados por nota (los que no tienen votos, al final y más recientes primero).
+ */
+export async function getRankedVenues(limit = 3): Promise<Array<VenueWithCity & VenueScore>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('venues')
+    .select('*, cities(slug, name)')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching ranked venues:', error)
+    return []
+  }
+
+  const venues = (data || []) as unknown as VenueWithCity[]
+  const scores = await getVenueScores(venues.map((v) => v.id))
+  return venues
+    .map((v) => ({ ...v, score: scores[v.id]?.score ?? null, votes: scores[v.id]?.votes ?? 0 }))
+    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || b.votes - a.votes)
+    .slice(0, limit)
+}
+
+/** Nº de locales publicados por ciudad. */
+export async function getVenueCountsByCity(): Promise<Record<string, number>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('venues').select('city_id').eq('status', 'published')
+  if (error) {
+    console.error('Error counting venues:', error)
+    return {}
+  }
+  const counts: Record<string, number> = {}
+  for (const v of (data || []) as Array<{ city_id: string }>) counts[v.city_id] = (counts[v.city_id] || 0) + 1
+  return counts
+}
