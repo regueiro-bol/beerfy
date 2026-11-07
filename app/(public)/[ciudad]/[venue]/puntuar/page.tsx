@@ -3,7 +3,10 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getVenueBySlugs } from '@/lib/supabase/queries'
 import { SiteHeader } from '@/components/site/chrome'
+import QRCode from 'qrcode'
+import { SITE_URL } from '@/lib/site'
 import { RateForm } from './rate-form'
+import { MobileGate } from './mobile-gate'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +27,7 @@ export default async function RatePage({ params }: PageProps) {
   if (!data) notFound()
   const { venue, city } = data
   const path = `/${city.slug}/${venue.slug}`
+  const qrSvg = await QRCode.toString(`${SITE_URL}${path}/puntuar`, { type: 'svg', margin: 0, color: { dark: '#0D0B08', light: '#F6F1E4' } })
 
   return (
     <main>
@@ -36,7 +40,9 @@ export default async function RatePage({ params }: PageProps) {
           </h1>
           <p className="mt-3 text-lg text-stone">{venue.name} · {city.name}</p>
         </div>
-        <RateForm venueId={venue.id} venueName={venue.name} path={path} />
+        <MobileGate qrSvg={qrSvg}>
+          <RateForm venueId={venue.id} venueName={venue.name} path={path} />
+        </MobileGate>
       </section>
     </main>
   )
