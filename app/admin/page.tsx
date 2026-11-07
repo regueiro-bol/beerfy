@@ -23,7 +23,8 @@ export default function AdminPage() {
           </Card>
         </Link>
 
-        <Card className="opacity-75">
+        <Link href="/admin/sugerencias" className="block group">
+        <Card className="h-full transition-shadow duration-200 group-hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xl font-bold">
               Sugerencias pendientes
@@ -32,10 +33,11 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Cola de sugerencias de la comunidad con clasificación por IA. (Vendrá en Sprint 3)
+              Valida las sugerencias de la comunidad contra Google y publícalas con su ubicación exacta.
             </p>
           </CardContent>
         </Card>
+        </Link>
       </div>
     </div>
   )
