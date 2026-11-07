@@ -8,8 +8,9 @@ import { getVenueBarOrPubSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
 import { SiteHeader, FoamEdge, ScoreBadge } from '@/components/site/chrome'
 import CityMap from '@/components/feature/city-map/CityMap'
 import { MapPin, Phone, Globe, Clock } from 'lucide-react'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 export const dynamic = 'force-dynamic'
 

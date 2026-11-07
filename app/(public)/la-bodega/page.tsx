@@ -4,8 +4,9 @@ import Image from 'next/image'
 import { SiteHeader } from '@/components/site/chrome'
 import { IMG, BAR_AMBIENCE } from '@/lib/content/images'
 import { CHAPTERS, FAQ } from '@/lib/content/bodega'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 export const metadata: Metadata = {
   title: 'La Bodega: guía de la cerveza de bodega (sin pasteurizar y de tanque)',

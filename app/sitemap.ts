@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { CHAPTERS } from '@/lib/content/bodega'
+import { SITE_URL } from '@/lib/site'
 
 export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+  const base = SITE_URL
 
   let cities: Array<{ slug: string }> = []
   try {

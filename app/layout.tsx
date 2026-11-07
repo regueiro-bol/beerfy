@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Bricolage_Grotesque, Inter, Newsreader } from 'next/font/google'
 import './globals.css'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-bricolage', display: 'swap' })
 const sans = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })

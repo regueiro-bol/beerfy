@@ -4,8 +4,9 @@ import { SiteHeader } from '@/components/site/chrome'
 import { getPublishedCities } from '@/lib/supabase/queries'
 import { IMG } from '@/lib/content/images'
 import { SuggestForm } from './suggest-form'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 export const dynamic = 'force-dynamic'
 

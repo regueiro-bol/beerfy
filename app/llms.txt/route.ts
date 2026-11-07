@@ -1,11 +1,12 @@
 import { CHAPTERS, FAQ } from '@/lib/content/bodega'
 import { getPublishedCities, getRankedVenues } from '@/lib/supabase/queries'
+import { SITE_URL } from '@/lib/site'
 
 export const dynamic = 'force-dynamic'
 
 /** llms.txt: resumen en texto plano para asistentes de IA y buscadores generativos. */
 export async function GET() {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+  const base = SITE_URL
   const [cities, venues] = await Promise.all([getPublishedCities(), getRankedVenues(50)])
 
   const lines = [

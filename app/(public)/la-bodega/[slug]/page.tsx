@@ -8,8 +8,9 @@ import { IMG } from '@/lib/content/images'
 import { CHAPTERS, getChapter } from '@/lib/content/bodega'
 import { getRankedVenues } from '@/lib/supabase/queries'
 import { getBreadcrumbSchema } from '@/lib/seo/schema'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 interface PageProps {
   params: Promise<{ slug: string }>

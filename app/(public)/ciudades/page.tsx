@@ -4,9 +4,10 @@ import Image from 'next/image'
 import { getPublishedCities, getVenueCountsByCity } from '@/lib/supabase/queries'
 import { SiteHeader } from '@/components/site/chrome'
 import { BAR_AMBIENCE, IMG } from '@/lib/content/images'
+import { SITE_URL } from '@/lib/site'
 const IMG_FALLBACK = IMG.bar1
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 export const dynamic = 'force-dynamic'
 
