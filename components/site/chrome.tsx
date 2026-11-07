@@ -33,7 +33,7 @@ export function SiteHeader({ variant = 'solid', current }: { variant?: 'overlay'
     >
       <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 md:px-8 md:py-5">
         <Logo tone={dark ? 'dark' : 'light'} />
-        <nav aria-label="Principal" className="order-3 flex w-full gap-6 overflow-x-auto text-[15px] font-medium md:order-none md:w-auto md:gap-8">
+        <nav aria-label="Principal" className="hidden gap-8 text-[15px] font-medium md:flex">
           {NAV.map((n) => (
             <Link
               key={n.href}
@@ -49,7 +49,7 @@ export function SiteHeader({ variant = 'solid', current }: { variant?: 'overlay'
         </nav>
         <Link
           href="/sugerir"
-          className="rounded-full bg-amber px-5 py-3 text-sm font-bold text-ink transition hover:brightness-95"
+          className="hidden rounded-full bg-amber px-5 py-3 text-sm font-bold text-ink transition hover:brightness-95 md:inline-block"
         >
           Sugerir un bar
         </Link>

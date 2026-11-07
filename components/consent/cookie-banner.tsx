@@ -58,7 +58,7 @@ export function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Preferencias de cookies"
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-3xl bg-ink p-5 text-cream shadow-2xl md:inset-x-auto md:right-6 md:bottom-6"
+      className="fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] z-50 mx-auto max-w-xl rounded-3xl bg-ink p-5 text-cream shadow-2xl md:inset-x-auto md:right-6 md:bottom-6"
     >
       <p className="mb-4 text-[15px] leading-relaxed">
         Usamos cookies de analítica (Google Analytics) para saber qué páginas se leen y mejorar la guía. Solo se activan si aceptas.{' '}
