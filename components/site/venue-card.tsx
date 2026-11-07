@@ -49,7 +49,7 @@ export function VenueCard({ href, name, place, coverUrl, coverCredit, score, vot
       </span>
       <div className="absolute inset-x-6 bottom-6 flex flex-col gap-1.5 text-cream">
         <p className="font-display text-[30px] font-extrabold leading-none tracking-[-0.02em] md:text-[34px]">{name}</p>
-        <p className="text-[15px] text-sand">{place}</p>
+        <p className="text-[15px] text-sand">{place.replace(/,\s*(Spain|España)$/i, '')}</p>
         <div className="mt-2 flex flex-wrap gap-2 text-[13px] font-semibold">
           {servesBodega && <span className="rounded-full bg-cream/15 px-3 py-1.5 backdrop-blur">Cerveza de bodega</span>}
           <span className="rounded-full bg-cream/15 px-3 py-1.5 backdrop-blur">
