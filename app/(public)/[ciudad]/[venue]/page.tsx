@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getVenueBySlugs, getVenueScores } from '@/lib/supabase/queries'
+import { getVenueBySlugs, getVenueScores, getVenueCriteria } from '@/lib/supabase/queries'
+import { getLivePlace } from '@/lib/google/place-live'
+import { formatScore } from '@/components/site/chrome'
 import { getVenueBarOrPubSchema } from '@/lib/seo/schema'
 import { SiteHeader, FoamEdge, ScoreBadge } from '@/components/site/chrome'
 import CityMap from '@/components/feature/city-map/CityMap'
@@ -33,13 +35,26 @@ export default async function VenueDetailPage({ params }: PageProps) {
 
   const { venue, city } = data
   const schema = getVenueBarOrPubSchema(venue, city)
-  const { score, votes } = (await getVenueScores([venue.id]))[venue.id] ?? { score: null, votes: 0 }
+  const [scores, criteria, live] = await Promise.all([
+    getVenueScores([venue.id]),
+    getVenueCriteria(venue.id),
+    getLivePlace(venue.google_place_id),
+  ])
+  const { score, votes } = scores[venue.id] ?? { score: null, votes: 0 }
+  const ratePath = `/${city.slug}/${venue.slug}/puntuar`
+  const phone = live?.phone ?? venue.phone
+  const website = live?.website ?? venue.website
+  const CRIT = [
+    { name: 'Temperatura', v: criteria.temperature },
+    { name: 'Espuma', v: criteria.foam },
+    { name: 'Vaso', v: criteria.glass },
+    { name: 'Tanque / frescura', v: criteria.freshness },
+  ]
   const mapCenter = {
     lat: venue.latitude ? Number(venue.latitude) : Number(city.latitude),
     lng: venue.longitude ? Number(venue.longitude) : Number(city.longitude),
   }
-  const hours = venue.hours_json as { weekdayDescriptions?: string[] } | null
-  const weekdays = hours?.weekdayDescriptions
+  const weekdays = live?.weekdayDescriptions
 
   return (
     <main>
@@ -86,6 +101,50 @@ export default async function VenueDetailPage({ params }: PageProps) {
 
       <section className="mx-auto flex max-w-[1320px] flex-wrap gap-10 px-5 pb-20 pt-6 md:px-8">
         <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-8">
+          <div className="flex flex-col gap-5 rounded-[32px] bg-ink p-7 text-cream md:p-9">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-[32px] font-extrabold leading-none tracking-[-0.02em] md:text-[40px]">Cómo la tiran</h2>
+              <span className="text-sm text-sand">{votes > 0 ? `${votes} ${votes === 1 ? 'puntuación' : 'puntuaciones'} de la comunidad` : 'Aún nadie la ha puntuado'}</span>
+            </div>
+            {votes > 0 ? (
+              <div className="flex flex-col gap-4">
+                {CRIT.map((c) => (
+                  <div key={c.name} className="flex flex-col gap-1.5">
+                    <div className="flex justify-between text-[15px] font-semibold">
+                      <span>{c.name}</span>
+                      <span className="text-amber">{c.v !== null ? formatScore(c.v) : '–'}</span>
+                    </div>
+                    <div className="h-2.5 rounded-full bg-[#2E281E]">
+                      <div className="h-2.5 rounded-full bg-amber" style={{ width: `${((c.v ?? 0) / 10) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sand">Sé el primero: temperatura, espuma, vaso y frescura en 30 segundos.</p>
+            )}
+            <Link href={ratePath} className="self-start rounded-2xl bg-amber px-6 py-4 text-[17px] font-extrabold text-ink transition hover:brightness-95">
+              Puntuar mi tirada
+            </Link>
+          </div>
+
+          {criteria.comments.length > 0 && (
+            <div>
+              <h2 className="mb-4 font-display text-[28px] font-extrabold">Últimas tiradas</h2>
+              <ul className="flex flex-col gap-3">
+                {criteria.comments.map((c, i) => (
+                  <li key={i} className="flex gap-4 rounded-2xl border-[1.5px] border-line bg-white p-4">
+                    <span className="h-fit rounded-lg bg-amber px-2 py-1 text-sm font-extrabold text-ink">{formatScore(c.score)}</span>
+                    <div>
+                      <p className="text-[15px] leading-relaxed text-[#26231C]">{c.comment}</p>
+                      <p className="mt-1 text-xs text-stone">{new Date(c.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div>
             <h2 className="mb-4 font-display text-[34px] font-extrabold tracking-[-0.02em]">Sobre este bar</h2>
             <p className="font-serif text-[21px] leading-relaxed text-[#26231C]">{venue.description || 'Descripción en preparación.'}</p>
@@ -106,17 +165,17 @@ export default async function VenueDetailPage({ params }: PageProps) {
             {venue.address && (
               <p className="flex gap-3 text-[15px]"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{venue.address}</p>
             )}
-            {venue.phone && (
-              <a href={`tel:${venue.phone}`} className="flex gap-3 text-[15px] hover:underline"><Phone className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{venue.phone}</a>
+            {phone && (
+              <a href={`tel:${phone}`} className="flex gap-3 text-[15px] hover:underline"><Phone className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{phone}</a>
             )}
-            {venue.website && (
-              <a href={venue.website} target="_blank" rel="noopener noreferrer" className="flex gap-3 break-all text-[15px] hover:underline">
+            {website && (
+              <a href={website} target="_blank" rel="noopener noreferrer" className="flex gap-3 break-all text-[15px] hover:underline">
                 <Globe className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />Web del local
               </a>
             )}
-            {venue.latitude !== null && venue.longitude !== null && (
+            {(live?.googleMapsUri || (venue.latitude !== null && venue.longitude !== null)) && (
               <a
-                href={`https://www.google.com/maps/search/?api=1&query=${venue.latitude},${venue.longitude}`}
+                href={live?.googleMapsUri ?? `https://www.google.com/maps/search/?api=1&query=${venue.latitude},${venue.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 rounded-full bg-amber px-5 py-3.5 text-center font-bold text-ink"
@@ -125,26 +184,52 @@ export default async function VenueDetailPage({ params }: PageProps) {
               </a>
             )}
           </div>
-          {weekdays && weekdays.length > 0 && (
+          {live && (live.rating !== null || (weekdays && weekdays.length > 0)) && (
             <div className="rounded-[28px] border-[1.5px] border-line bg-white p-7">
-              <h2 className="mb-4 flex items-center gap-2 font-display text-2xl font-extrabold"><Clock className="h-5 w-5 text-copper" aria-hidden="true" />Horario</h2>
-              <ul className="flex flex-col gap-2 text-sm">
-                {weekdays.map((d, i) => {
-                  const k = d.indexOf(':')
-                  return (
-                    <li key={i} className="flex justify-between gap-3 border-b border-line pb-1.5 last:border-0">
-                      <span className="font-medium capitalize">{d.substring(0, k)}</span>
-                      <span className="text-right text-stone">{d.substring(k + 1)}</span>
-                    </li>
-                  )
-                })}
-              </ul>
+              {live.businessStatus && live.businessStatus !== 'OPERATIONAL' && (
+                <p className="mb-4 rounded-xl bg-[#FBE3DC] px-3 py-2 text-sm font-semibold text-[#8A2A12]">
+                  {live.businessStatus === 'CLOSED_PERMANENTLY' ? 'Cerrado permanentemente' : 'Cerrado temporalmente'}
+                </p>
+              )}
+              {live.rating !== null && (
+                <div className="mb-5 flex items-center gap-3 border-b border-line pb-5">
+                  <span className="font-display text-[34px] font-extrabold leading-none">{live.rating.toFixed(1).replace('.', ',')}</span>
+                  <span className="text-sm text-stone">
+                    sobre 5 en Google
+                    {live.userRatingCount ? <><br />{live.userRatingCount.toLocaleString('es-ES')} reseñas</> : null}
+                  </span>
+                </div>
+              )}
+              {weekdays && weekdays.length > 0 && (
+                <>
+                  <h2 className="mb-4 flex items-center justify-between gap-2 font-display text-2xl font-extrabold">
+                    <span className="flex items-center gap-2"><Clock className="h-5 w-5 text-copper" aria-hidden="true" />Horario</span>
+                    {live.openNow !== null && (
+                      <span className={`rounded-full px-3 py-1 font-sans text-xs font-bold ${live.openNow ? 'bg-[#DDF3E5] text-[#1F6B3E]' : 'bg-[#F3EEE2] text-stone'}`}>
+                        {live.openNow ? 'Abierto ahora' : 'Cerrado ahora'}
+                      </span>
+                    )}
+                  </h2>
+                  <ul className="flex flex-col gap-2 text-sm">
+                    {weekdays.map((d, i) => {
+                      const k = d.indexOf(':')
+                      return (
+                        <li key={i} className="flex justify-between gap-3 border-b border-line pb-1.5 last:border-0">
+                          <span className="font-medium capitalize">{d.substring(0, k)}</span>
+                          <span className="text-right text-stone">{d.substring(k + 1)}</span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </>
+              )}
+              <p className="mt-5 text-[11px] leading-snug text-stone">
+                Horario y puntuación de{' '}
+                <span translate="no" className="font-[Roboto,Arial,sans-serif] text-[13px] font-medium text-[#5E5E5E]">Google Maps</span>
+                . No son valoraciones de Beerfy ni miden la tirada.
+              </p>
             </div>
           )}
-          <div className="rounded-[28px] bg-[#F3EEE2] p-7">
-            <p className="font-display text-xl font-extrabold">Puntuar la tirada</p>
-            <p className="mt-2 text-sm text-stone">Muy pronto podrás puntuar temperatura, espuma, vaso y frescura en 30 segundos, sin registro.</p>
-          </div>
         </aside>
       </section>
     </main>

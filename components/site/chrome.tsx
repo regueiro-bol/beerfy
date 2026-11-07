@@ -73,6 +73,8 @@ export function SiteFooter() {
             <Link href="/la-bodega" className="hover:text-cream">La Bodega</Link>
             <Link href="/sugerir" className="hover:text-cream">Sugerir un bar</Link>
             <Link href="/sobre-beerfy" className="hover:text-cream">Sobre Beerfy</Link>
+            <Link href="/aviso-legal" className="hover:text-cream">Aviso legal</Link>
+            <Link href="/privacidad" className="hover:text-cream">Privacidad</Link>
           </nav>
           <p>
             Beerfy es una guía independiente, sin afiliación con ninguna cervecera. Estrella Galicia es marca registrada de
