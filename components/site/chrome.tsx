@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BrandMark, BrandTile } from '@/components/brand/mark'
 
 const NAV = [
   { href: '/ciudades', label: 'Ciudades' },
@@ -10,11 +11,7 @@ export function Logo({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
   const ink = tone === 'light' ? '#0D0B08' : '#F6F1E4'
   return (
     <Link href="/" className="flex items-center gap-2.5" aria-label="Beerfy, inicio">
-      <svg width="32" height="32" viewBox="0 0 30 30" aria-hidden="true">
-        <rect x="7" y="3" width="16" height="22" rx="8" fill="#F2B33D" />
-        <path d="M7 10h16" stroke="#0D0B08" strokeWidth="2" />
-        <path d="M11 25v3M19 25v3" stroke="#F2B33D" strokeWidth="2" strokeLinecap="round" />
-      </svg>
+      {tone === 'light' ? <BrandTile size={36} /> : <BrandMark size={38} />}
       <span className="font-display text-[27px] font-extrabold tracking-[-0.03em]" style={{ color: ink }}>
         beerfy
       </span>
