@@ -8,8 +8,9 @@ import { SiteHeader } from '@/components/site/chrome'
 import { VenueCard } from '@/components/site/venue-card'
 import { BAR_AMBIENCE } from '@/lib/content/images'
 import CityMap from '@/components/feature/city-map/CityMap'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 export const dynamic = 'force-dynamic'
 

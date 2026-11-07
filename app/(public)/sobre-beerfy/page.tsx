@@ -3,8 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { SiteHeader } from '@/components/site/chrome'
 import { IMG } from '@/lib/content/images'
+import { SITE_URL } from '@/lib/site'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+const APP_URL = SITE_URL
 
 export const metadata: Metadata = {
   title: 'Sobre Beerfy',

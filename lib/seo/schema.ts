@@ -1,4 +1,5 @@
 import type { City, Venue } from '@/lib/types/database'
+import { SITE_URL } from '@/lib/site'
 
 /**
  * Generates Schema.org Place JSON-LD metadata for a city.
@@ -63,7 +64,7 @@ export function getVenueBarOrPubSchema(venue: Venue, city: City) {
 
 /** BreadcrumbList para rich results y para que los LLM entiendan la jerarquía. */
 export function getBreadcrumbSchema(items: Array<{ name: string; path: string }>) {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://beerfy.bar'
+  const base = SITE_URL
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
