@@ -131,6 +131,21 @@ export default async function ChapterPage({ params }: PageProps) {
               </section>
             ))}
 
+            {c.sources && c.sources.length > 0 && (
+              <section aria-labelledby="fuentes" className="mb-10 rounded-3xl bg-cream p-6 font-sans text-[15px]">
+                <h2 id="fuentes" className="mb-3 font-display text-xl font-extrabold text-[#16140F]">Fuentes</h2>
+                <ul className="flex flex-col gap-2">
+                  {c.sources.map((src) => (
+                    <li key={src.url}>
+                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-bottle underline underline-offset-4">
+                        {src.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             <div className="flex items-center gap-3.5 border-t border-line pt-6 font-sans text-sm">
               <svg width="44" height="44" viewBox="0 0 30 30" aria-hidden="true">
                 <rect x="7" y="3" width="16" height="22" rx="8" fill="#F2B33D" />
