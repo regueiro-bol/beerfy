@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { BrandTile } from '@/components/brand/mark'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { SiteHeader } from '@/components/site/chrome'
@@ -147,10 +148,7 @@ export default async function ChapterPage({ params }: PageProps) {
             )}
 
             <div className="flex items-center gap-3.5 border-t border-line pt-6 font-sans text-sm">
-              <svg width="44" height="44" viewBox="0 0 30 30" aria-hidden="true">
-                <rect x="7" y="3" width="16" height="22" rx="8" fill="#F2B33D" />
-                <path d="M7 10h16" stroke="#0D0B08" strokeWidth="2" />
-              </svg>
+              <BrandTile size={44} />
               <div>
                 <strong>Redacción Beerfy</strong>
                 <br />
