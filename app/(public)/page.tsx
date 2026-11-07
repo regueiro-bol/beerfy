@@ -263,7 +263,7 @@ export default async function HomePage() {
                 href={`/${city.slug}`}
                 className={`relative flex min-h-[210px] flex-col justify-between overflow-hidden rounded-[30px] p-6 transition hover:-translate-y-0.5 ${tone}`}
               >
-                <span className="text-sm font-semibold opacity-80">{n === 1 ? '1 bar' : `${n} bares`}</span>
+                <span className="text-sm font-semibold opacity-80">{n === 0 ? 'Próximamente' : n === 1 ? '1 bar' : `${n} bares`}</span>
                 <span className="font-display text-[44px] font-extrabold leading-none tracking-[-0.03em]">{city.name}</span>
               </Link>
             )
