@@ -10,7 +10,7 @@ export default function PrivacyPage() {
       <p>Beerfy es una guía colaborativa. Tratamos los mínimos datos posibles para que funcione.</p>
       <h2>Qué datos tratamos</h2>
       <ul>
-        <li><strong>Puntuaciones:</strong> no pedimos registro. Para evitar abusos guardamos un identificador cifrado e irreversible derivado de tu dirección IP y el tipo de navegador.</li>
+        <li><strong>Puntuaciones:</strong> no pedimos registro. Para evitar abusos guardamos un identificador cifrado e irreversible derivado de tu dirección IP y el tipo de navegador. Para comprobar que puntúas desde el bar, al enviar la nota te pedimos permiso de ubicación: la usamos solo para calcular la distancia al local en ese momento y la descartamos; no se guarda ni se asocia a tu nota.</li>
         <li><strong>Sugerencias de bares:</strong> los datos del bar que nos envías y, solo si pides que te avisemos, tu email, que usamos únicamente para ese aviso.</li>
       </ul>
       <h2>Google Maps</h2>

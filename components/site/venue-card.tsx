@@ -50,7 +50,7 @@ export function VenueCard({ href, name, place, coverUrl, score, votes, rank, ser
         <div className="mt-2 flex flex-wrap gap-2 text-[13px] font-semibold">
           {servesBodega && <span className="rounded-full bg-cream/15 px-3 py-1.5 backdrop-blur">Cerveza de bodega</span>}
           <span className="rounded-full bg-cream/15 px-3 py-1.5 backdrop-blur">
-            {votes > 0 ? `${votes} puntuaciones` : 'Sin puntuaciones aún'}
+            {score !== null ? `${votes} puntuaciones` : votes > 0 ? `En calibración · ${votes}/5` : 'Sin puntuaciones aún'}
           </span>
         </div>
       </div>
