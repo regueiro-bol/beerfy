@@ -57,6 +57,11 @@ export default async function VenueDetailPage({ params }: PageProps) {
     lng: venue.longitude ? Number(venue.longitude) : Number(city.longitude),
   }
   const weekdays = live?.weekdayDescriptions
+  const gPhotos = live?.photos ?? []
+  const heroGoogle = !venue.cover_image_url && gPhotos.length > 0 ? gPhotos[0] : null
+  const heroSrc = venue.cover_image_url ?? heroGoogle?.url ?? null
+  const gallery = venue.cover_image_url ? gPhotos.slice(0, 3) : gPhotos.slice(1, 4)
+  const closed = live?.businessStatus && live.businessStatus !== 'OPERATIONAL' ? live.businessStatus : null
 
   return (
     <main>
@@ -75,14 +80,23 @@ export default async function VenueDetailPage({ params }: PageProps) {
       />
 
       <section className="relative min-h-[560px] overflow-hidden bg-ink text-cream">
-        {venue.cover_image_url ? (
+        {heroSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={venue.cover_image_url} alt={`Foto de ${venue.name}`} className="absolute inset-0 h-full w-full object-cover" />
+          <img src={heroSrc} alt={`Foto de ${venue.name}`} className="absolute inset-0 h-full w-full object-cover" referrerPolicy="no-referrer" />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,#4A3414,#0D0B08_60%)]" aria-hidden="true" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-ink/70" aria-hidden="true" />
         <SiteHeader variant="overlay" />
+        {heroGoogle && (
+          <p className="absolute bottom-3 right-4 z-10 text-[11px] text-sand/90">
+            Foto:{' '}
+            {heroGoogle.authorUri ? (
+              <a href={heroGoogle.authorUri} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{heroGoogle.author ?? 'usuario de Google'}</a>
+            ) : (heroGoogle.author ?? 'usuario de Google')}{' '}
+            · <span translate="no">Google Maps</span>
+          </p>
+        )}
         <div className="relative mx-auto flex max-w-[1320px] flex-wrap items-end justify-between gap-8 px-5 pb-14 pt-24 md:px-8 md:pt-40">
           <div className="max-w-[820px]">
             <nav aria-label="Migas de pan" className="mb-5 flex flex-wrap gap-2 text-sm text-sand">
@@ -90,6 +104,11 @@ export default async function VenueDetailPage({ params }: PageProps) {
               <span aria-hidden="true">/</span>
               <Link href={`/${city.slug}`} className="underline-offset-4 hover:underline">{city.name}</Link>
             </nav>
+            {closed && (
+              <p className="mb-4 inline-block rounded-full bg-[#FBE3DC] px-4 py-1.5 text-sm font-bold text-[#8A2A12]">
+                {closed === 'CLOSED_PERMANENTLY' ? 'Google indica que ha cerrado definitivamente' : 'Google indica que está cerrado temporalmente'}
+              </p>
+            )}
             <h1 className="font-display text-[52px] font-extrabold leading-[0.9] tracking-[-0.04em] md:text-[96px]">{venue.name}</h1>
             <p className="mt-4 text-lg text-sand">
               {[venue.district, city.name].filter(Boolean).join(' · ')}
@@ -206,6 +225,26 @@ export default async function VenueDetailPage({ params }: PageProps) {
               </p>
             )}
           </div>
+          {gallery.length > 0 && (
+            <div>
+              <h2 className="mb-4 font-display text-[28px] font-extrabold">Fotos del local</h2>
+              <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+                {gallery.map((ph) => (
+                  <li key={ph.url} className="flex flex-col gap-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ph.url} alt={`Foto de ${venue.name}`} loading="lazy" referrerPolicy="no-referrer" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+                    <span className="text-[11px] text-stone">
+                      Foto:{' '}
+                      {ph.authorUri ? (
+                        <a href={ph.authorUri} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{ph.author ?? 'usuario de Google'}</a>
+                      ) : (ph.author ?? 'usuario de Google')}{' '}
+                      · <span translate="no">Google Maps</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {(venue.latitude !== null || city.latitude !== null) && (
             <div className="overflow-hidden rounded-[28px]">
               <CityMap venues={[venue]} center={mapCenter} citySlug={city.slug} zoom={16} />
@@ -238,6 +277,22 @@ export default async function VenueDetailPage({ params }: PageProps) {
               </a>
             )}
           </div>
+          {live && (live.features.length > 0 || live.priceLevel) && (
+            <div className="rounded-[28px] border-[1.5px] border-line bg-white p-7">
+              <h2 className="mb-4 font-display text-2xl font-extrabold">El local</h2>
+              <ul className="flex flex-wrap gap-2">
+                {live.priceLevel && (
+                  <li className="rounded-full bg-amber px-3.5 py-1.5 text-sm font-bold text-ink" aria-label={`Nivel de precio ${live.priceLevel.length} de 4`}>{live.priceLevel}</li>
+                )}
+                {live.features.map((f) => (
+                  <li key={f} className="rounded-full bg-cream px-3.5 py-1.5 text-sm font-semibold text-[#26231C]">{f}</li>
+                ))}
+              </ul>
+              <p className="mt-4 text-[11px] leading-snug text-stone">
+                Datos de <span translate="no" className="font-[Roboto,Arial,sans-serif] text-[13px] font-medium text-[#5E5E5E]">Google Maps</span>. Pueden no estar al día.
+              </p>
+            </div>
+          )}
           {live && (live.rating !== null || (weekdays && weekdays.length > 0)) && (
             <div className="rounded-[28px] border-[1.5px] border-line bg-white p-7">
               {live.businessStatus && live.businessStatus !== 'OPERATIONAL' && (
