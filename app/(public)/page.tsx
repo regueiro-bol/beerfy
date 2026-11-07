@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { InstallApp } from '@/components/mobile/pwa'
 import Image from 'next/image'
 import { getPublishedCities, getRankedVenues, getVenueCountsByCity } from '@/lib/supabase/queries'
+import { getCovers } from '@/lib/google/place-live'
 import { SiteHeader, Marquee } from '@/components/site/chrome'
 import { VenueCard } from '@/components/site/venue-card'
 import { IMG } from '@/lib/content/images'
@@ -25,6 +26,7 @@ const JOURNEY = [
 
 export default async function HomePage() {
   const [cities, ranked, counts] = await Promise.all([getPublishedCities(), getRankedVenues(3), getVenueCountsByCity()])
+  const covers = await getCovers(ranked)
   const totalVenues = Object.values(counts).reduce((a, b) => a + b, 0)
   const hasScores = ranked.some((v) => v.score !== null)
 
@@ -195,7 +197,8 @@ export default async function HomePage() {
                   href={`/${v.cities?.slug}/${v.slug}`}
                   name={v.name}
                   place={[v.cities?.name, v.district].filter(Boolean).join(' · ')}
-                  coverUrl={v.cover_image_url}
+                  coverUrl={covers[v.id]?.url ?? null}
+                  coverCredit={covers[v.id]?.google ?? null}
                   score={v.score}
                   votes={v.votes}
                   rank={hasScores ? i + 1 : undefined}
