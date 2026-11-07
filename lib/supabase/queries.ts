@@ -173,3 +173,54 @@ export async function getVenueCountsByCity(): Promise<Record<string, number>> {
   for (const v of (data || []) as Array<{ city_id: string }>) counts[v.city_id] = (counts[v.city_id] || 0) + 1
   return counts
 }
+
+export type CriteriaBreakdown = {
+  temperature: number | null
+  foam: number | null
+  glass: number | null
+  freshness: number | null
+  votes: number
+  comments: Array<{ comment: string; score: number; created_at: string }>
+}
+
+/** Desglose por criterios (escala 0–10) y últimos comentarios visibles de un local. */
+export async function getVenueCriteria(venueId: string): Promise<CriteriaBreakdown> {
+  const empty: CriteriaBreakdown = { temperature: null, foam: null, glass: null, freshness: null, votes: 0, comments: [] }
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('ratings')
+    .select('rating, score_temperature, score_foam, score_glass, score_freshness, comment, created_at')
+    .eq('venue_id', venueId)
+    .eq('status', 'visible')
+    .order('created_at', { ascending: false })
+    .limit(500)
+  if (error || !data) {
+    if (error) console.error('Error fetching criteria:', error)
+    return empty
+  }
+  type Row = {
+    rating: number
+    score_temperature: number | null
+    score_foam: number | null
+    score_glass: number | null
+    score_freshness: number | null
+    comment: string | null
+    created_at: string
+  }
+  const rows = data as Row[]
+  const avg = (k: keyof Row) => {
+    const vals = rows.map((r) => r[k]).filter((v): v is number => typeof v === 'number')
+    return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) * 2 : null
+  }
+  return {
+    temperature: avg('score_temperature'),
+    foam: avg('score_foam'),
+    glass: avg('score_glass'),
+    freshness: avg('score_freshness'),
+    votes: rows.length,
+    comments: rows
+      .filter((r) => r.comment)
+      .slice(0, 5)
+      .map((r) => ({ comment: r.comment as string, score: r.rating * 2, created_at: r.created_at })),
+  }
+}
