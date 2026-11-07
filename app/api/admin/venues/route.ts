@@ -75,6 +75,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Cerveza en tanque por defecto (el asistente aún no pregunta cuál).
+    const { data: beer } = await supabase.from('beers').select('id').eq('slug', 'estrella-galicia-de-bodega').maybeSingle()
+    if (beer && data) await supabase.from('venue_beers').upsert({ venue_id: data.id, beer_id: beer.id, source: 'equipo' }, { onConflict: 'venue_id,beer_id' })
+
     return NextResponse.json(data)
   } catch (e: unknown) {
     console.error('Error in venues API POST route:', e)

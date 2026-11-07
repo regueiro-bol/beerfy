@@ -238,3 +238,49 @@ export async function getVenueCriteria(venueId: string): Promise<CriteriaBreakdo
       .map((r) => ({ comment: r.comment as string, score: ratingValue(r) * 2, created_at: r.created_at })),
   }
 }
+
+export type TankBeer = {
+  id: string
+  slug: string
+  name: string
+  brewery: string
+  style: string | null
+  unpasteurized: boolean
+  status: 'confirmada' | 'por_confirmar'
+  source: 'equipo' | 'comunidad' | 'bar'
+  last_confirmed_at: string | null
+}
+
+/** Cervezas en tanque de un local (sin las retiradas). */
+export async function getVenueBeers(venueId: string): Promise<TankBeer[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('venue_beers')
+    .select('status, source, last_confirmed_at, beers(id, slug, name, brewery, style, unpasteurized)')
+    .eq('venue_id', venueId)
+    .neq('status', 'retirada')
+  if (error) {
+    console.error('Error fetching venue beers:', error)
+    return []
+  }
+  type Row = {
+    status: TankBeer['status']
+    source: TankBeer['source']
+    last_confirmed_at: string | null
+    beers: Omit<TankBeer, 'status' | 'source' | 'last_confirmed_at'> | null
+  }
+  return ((data || []) as unknown as Row[])
+    .filter((r) => r.beers)
+    .map((r) => ({ ...r.beers!, status: r.status, source: r.source, last_confirmed_at: r.last_confirmed_at }))
+}
+
+/** Hace cuánto, en lenguaje natural. */
+export function timeAgo(iso: string | null) {
+  if (!iso) return null
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
+  if (days <= 0) return 'hoy'
+  if (days === 1) return 'ayer'
+  if (days < 30) return `hace ${days} días`
+  const months = Math.floor(days / 30)
+  return months === 1 ? 'hace 1 mes' : `hace ${months} meses`
+}
