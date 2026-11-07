@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { searchPlaces, getPlaceDetails, type PlaceSearchResult } from '@/lib/google/places'
+import { geocodeAddress } from '@/lib/geo/nominatim'
 
 /**
  * Validación automática de sugerencias contra Google Places.
@@ -45,12 +46,45 @@ function slugify(text: string) {
 }
 
 /** Crea y publica un bar desde un place_id de Google. Devuelve el slug o null si ya existía. */
-export async function publishVenueFromPlace(opts: { cityId: string; placeId: string; name: string; servesBodega: boolean; fallbackAddress?: string | null }) {
+export async function publishVenueFromPlace(opts: {
+  cityId: string
+  placeId: string
+  name: string
+  servesBodega: boolean
+  fallbackAddress?: string | null
+  /** Ficha provisional (sin place_id) que hay que completar en lugar de crear otra. */
+  provisionalSlug?: string
+}) {
   const supabase = createServiceClient()
   const { data: dup } = await supabase.from('venues').select('id, slug').eq('google_place_id', opts.placeId).maybeSingle()
   if (dup) return { created: false as const, slug: dup.slug as string }
 
   const place = await getPlaceDetails(opts.placeId)
+
+  if (opts.provisionalSlug) {
+    const { data: prov } = await supabase
+      .from('venues')
+      .select('id, slug')
+      .eq('city_id', opts.cityId)
+      .eq('slug', opts.provisionalSlug)
+      .is('google_place_id', null)
+      .maybeSingle()
+    if (prov) {
+      const { error } = await supabase
+        .from('venues')
+        .update({
+          google_place_id: opts.placeId,
+          address: place.formattedAddress || opts.fallbackAddress || null,
+          latitude: place.location.lat || null,
+          longitude: place.location.lng || null,
+          coords_source: 'google',
+          coords_updated_at: new Date().toISOString(),
+        })
+        .eq('id', prov.id)
+      if (error) throw new Error(error.message)
+      return { created: true as const, slug: prov.slug as string }
+    }
+  }
   const base = slugify(opts.name) || 'bar'
   let slug = base
   for (let i = 2; i < 20; i++) {
@@ -115,7 +149,14 @@ export async function autoValidateSuggestion(suggestionId: string): Promise<Auto
   if (dist > MAX_KM) return keepPending(`Demasiado lejos de ${city.name}: ${dist.toFixed(1)} km`)
   if (!isHosp) return keepPending(`Tipo de local dudoso: ${type}`)
 
-  const pub = await publishVenueFromPlace({ cityId: s.city_id, placeId: top.id, name: top.name || s.venue_name, servesBodega: true, fallbackAddress: s.address })
+  const pub = await publishVenueFromPlace({
+    cityId: s.city_id,
+    placeId: top.id,
+    name: top.name || s.venue_name,
+    servesBodega: true,
+    fallbackAddress: s.address,
+    provisionalSlug: slugify(s.venue_name),
+  })
   await supabase
     .from('venue_suggestions')
     .update({
@@ -133,5 +174,51 @@ export async function autoValidateSuggestion(suggestionId: string): Promise<Auto
     result: pub.created ? 'published' : 'duplicate',
     detail: `${top.name} · ${top.formattedAddress} · ${top.location.lat.toFixed(5)},${top.location.lng.toFixed(5)} · ${type}`,
     url: `/${city.slug}/${pub.slug}`,
+  }
+}
+
+/**
+ * Publica una ficha PROVISIONAL sin Google: nombre y dirección de la sugerencia y coordenadas de OpenStreetMap.
+ * La sugerencia sigue pendiente; cuando la validación con Google funcione, completará esta misma ficha.
+ */
+export async function publishProvisional(suggestionId: string): Promise<AutoResult> {
+  const supabase = createServiceClient()
+  const { data: s } = await supabase
+    .from('venue_suggestions')
+    .select('id, venue_name, address, city_id, status, cities(name, slug)')
+    .eq('id', suggestionId)
+    .single()
+  if (!s || s.status !== 'pending' || !s.city_id) return { id: suggestionId, name: s?.venue_name ?? '?', result: 'pending', detail: 'No apta' }
+  const city = s.cities as unknown as { name: string; slug: string }
+  const slug = slugify(s.venue_name)
+  const { data: exists } = await supabase.from('venues').select('id').eq('city_id', s.city_id).eq('slug', slug).maybeSingle()
+  if (exists) return { id: s.id, name: s.venue_name, result: 'duplicate', detail: 'Ya publicada', url: `/${city.slug}/${slug}` }
+
+  const geo = s.address ? await geocodeAddress(s.address) : null
+  const now = new Date().toISOString()
+  const { error } = await supabase.from('venues').insert({
+    city_id: s.city_id,
+    slug,
+    name: s.venue_name,
+    address: s.address,
+    latitude: geo?.lat ?? null,
+    longitude: geo?.lng ?? null,
+    coords_source: 'manual',
+    coords_updated_at: geo ? now : null,
+    serves_eg_bodega: true,
+    status: 'published',
+    published_at: now,
+  })
+  if (error) return { id: s.id, name: s.venue_name, result: 'pending', detail: error.message }
+  await supabase
+    .from('venue_suggestions')
+    .update({ ai_notes: `Ficha provisional publicada (coordenadas OSM: ${geo ? geo.label : 'sin geocodificar'}). Pendiente de Google.` })
+    .eq('id', s.id)
+  return {
+    id: s.id,
+    name: s.venue_name,
+    result: 'published',
+    detail: geo ? `${geo.lat.toFixed(5)},${geo.lng.toFixed(5)} · ${geo.label}` : 'sin coordenadas',
+    url: `/${city.slug}/${slug}`,
   }
 }
