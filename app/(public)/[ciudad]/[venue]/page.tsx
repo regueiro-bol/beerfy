@@ -127,7 +127,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
           <div className="rotate-3 rounded-3xl bg-amber p-1 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.6)]">
             <ScoreBadge score={score} size="lg" />
             <p className="px-3 pb-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] text-ink">
-              {votes > 0 ? `Nota de tirada · ${votes} votos` : 'Sin puntuaciones aún'}
+              {votes > 0 ? `Nota de tirada · ${votes} ${votes === 1 ? 'voto' : 'votos'}` : 'Sin puntuaciones aún'}
             </p>
           </div>
         </div>
