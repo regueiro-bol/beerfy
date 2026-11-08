@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { InstallApp } from '@/components/mobile/pwa'
 import Image from 'next/image'
-import { getPublishedCities, getRankedVenues, getVenueCountsByCity } from '@/lib/supabase/queries'
+import { getPublishedCities, getRankedVenues, getVenueCountsByCity, getPublishedVenues, getVenueScores } from '@/lib/supabase/queries'
+import { NearbyHome, type NearbyItem } from '@/components/mobile/nearby-home'
 import { getCovers } from '@/lib/google/place-live'
 import { SiteHeader, Marquee } from '@/components/site/chrome'
 import { VenueCard } from '@/components/site/venue-card'
@@ -27,6 +28,18 @@ const JOURNEY = [
 export default async function HomePage() {
   const [cities, ranked, counts] = await Promise.all([getPublishedCities(), getRankedVenues(3), getVenueCountsByCity()])
   const covers = await getCovers(ranked)
+  const allVenues = (await getPublishedVenues()).filter((v) => v.latitude !== null && v.longitude !== null && v.cities?.slug)
+  const allScores = await getVenueScores(allVenues.map((v) => v.id))
+  const nearbyItems: NearbyItem[] = allVenues.map((v) => ({
+    id: v.id,
+    name: v.name,
+    href: `/${v.cities!.slug}/${v.slug}`,
+    lat: Number(v.latitude),
+    lng: Number(v.longitude),
+    score: allScores[v.id]?.score ?? null,
+    votes: allScores[v.id]?.votes ?? 0,
+    cover: v.cover_image_url,
+  }))
   const totalVenues = Object.values(counts).reduce((a, b) => a + b, 0)
   const hasScores = ranked.some((v) => v.score !== null)
 
@@ -52,6 +65,7 @@ export default async function HomePage() {
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-ink to-transparent" aria-hidden="true" />
 
         <SiteHeader variant="overlay" />
+        <NearbyHome items={nearbyItems} />
 
         <div className="relative mx-auto max-w-[1320px] px-5 pb-24 pt-24 md:px-8 md:pb-32 md:pt-16">
           <div className="flex max-w-[640px] flex-col gap-7">
