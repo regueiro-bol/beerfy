@@ -121,7 +121,7 @@ export function NearbyHome({ items }: { items: NearbyItem[] }) {
         <ul className="flex flex-col gap-2.5">
           {nearest.map((n) => (
             <li key={n.id}>
-              <Link href={n.d <= 200 ? `${n.href}/puntuar` : n.href} className="flex items-center gap-3 rounded-[20px] bg-white/[0.08] p-2.5 pr-4 backdrop-blur">
+              <Link href={n.href} className="flex items-center gap-3 rounded-[20px] bg-white/[0.08] p-2.5 pr-4 backdrop-blur">
                 {n.cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={n.cover} alt="" className="h-14 w-14 flex-none rounded-2xl object-cover" />
@@ -136,11 +136,10 @@ export function NearbyHome({ items }: { items: NearbyItem[] }) {
                     {formatDistance(n.d)} · {n.score !== null ? `${formatScore(n.score)} de tirada` : n.votes > 0 ? 'En calibración' : 'Sin notas aún'}
                   </span>
                 </span>
-                {n.d <= 200 ? (
-                  <span className="flex-none rounded-full bg-amber px-3 py-1.5 text-xs font-extrabold text-ink">Puntuar</span>
-                ) : (
-                  <span aria-hidden="true" className="text-xl text-sand">›</span>
+                {n.d <= 200 && (
+                  <span className="flex-none rounded-full border border-amber/60 px-2.5 py-1 text-[11px] font-bold text-amber">Estás aquí</span>
                 )}
+                <span aria-hidden="true" className="text-xl text-sand">›</span>
               </Link>
             </li>
           ))}
