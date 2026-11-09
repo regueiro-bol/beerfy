@@ -39,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;
 gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});
 try{if(localStorage.getItem('${CONSENT_KEY}')==='granted'){gtag('consent','update',{analytics_storage:'granted'});}}catch(e){}
+try{var dm=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true?'app':'navegador';dataLayer.push({display_mode:dm});}catch(e){}
 if(/(?:^|; )bfy-age=1/.test(document.cookie))document.documentElement.classList.add('age-ok');`}
         </Script>
         <Script id="gtm" strategy="afterInteractive">

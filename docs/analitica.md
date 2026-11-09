@@ -27,3 +27,11 @@ La web empuja eventos al `dataLayer`. En Tag Manager:
 | consent_update | Elección del banner de cookies | consent_analytics |
 
 Los enlaces compartidos llevan `utm_source` (red), `utm_medium=share`, `utm_campaign` (ficha/tirada).
+
+## Modo de apertura (app instalada vs navegador)
+
+Antes de cargar GTM, la web empuja `{display_mode: 'app' | 'navegador'}` al dataLayer
+(`app` = abierta desde el icono instalado, modo standalone). En GTM la variable
+`DLV - display_mode` se envía como parámetro de configuración de la etiqueta de Google,
+así que viaja con **todos** los eventos (page_view incluido). En GA4 es la dimensión
+personalizada «Modo de apertura».
