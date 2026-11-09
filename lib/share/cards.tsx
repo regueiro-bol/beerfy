@@ -130,7 +130,7 @@ export function VenuePost(d: VenueCardData) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '40px 64px 56px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontFamily: 'Bricolage', fontSize: d.name.length > 20 ? 84 : 100, lineHeight: 1, letterSpacing: -3 }}>{d.name}</div>
-          <div style={{ fontSize: 34, color: '#5E5A50' }}>{d.place} · {d.beer ?? 'Cerveza de bodega'} en tanque</div>
+          <div style={{ fontSize: 34, color: '#5E5A50' }}>{`${d.place} · ${d.beer ?? 'Cerveza de bodega'} en tanque`}</div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -213,7 +213,7 @@ export function TiradaStory(d: TiradaData) {
           </div>
         ))}
         {d.comment && (
-          <span style={{ marginTop: 20, fontFamily: 'Newsreader', fontStyle: 'italic', fontSize: 54, lineHeight: 1.15 }}>«{d.comment.slice(0, 110)}{d.comment.length > 110 ? '…' : ''}»</span>
+          <span style={{ marginTop: 20, fontFamily: 'Newsreader', fontStyle: 'italic', fontSize: 54, lineHeight: 1.15 }}>{`«${d.comment.slice(0, 110)}${d.comment.length > 110 ? '…' : ''}»`}</span>
         )}
         <span style={{ marginTop: 16, fontSize: 36, color: '#A99F8B' }}>¿Y a ti, cómo te la tiran? · beerfy.es</span>
       </div>
