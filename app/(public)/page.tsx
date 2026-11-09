@@ -50,7 +50,7 @@ export default async function HomePage() {
         <div className="absolute inset-y-0 right-0 w-full md:w-[58%]">
           <Image
             src={IMG.hero}
-            alt="Caña recién tirada con la espuma desbordando el vaso"
+            alt="Caña de lager dorada recién tirada, con dos dedos de espuma"
             fill
             preload
             sizes="(max-width: 768px) 100vw, 58vw"
