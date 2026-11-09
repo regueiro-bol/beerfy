@@ -5,6 +5,7 @@ import Link from 'next/link'
 import CityMap from '@/components/feature/city-map/CityMap'
 import { ScoreBadge } from '@/components/site/chrome'
 import { distanceM, formatDistance } from '@/lib/geo/distance'
+import { track } from '@/lib/analytics'
 import type { Venue } from '@/lib/types/database'
 
 export type NearVenue = { venue: Venue; citySlug: string; score: number | null; votes: number }
@@ -26,8 +27,10 @@ export function NearMe({ venues }: { venues: NearVenue[] }) {
       (p) => {
         setMe({ lat: p.coords.latitude, lng: p.coords.longitude })
         setState('idle')
+        track('geo_permission', { state: 'granted', location: 'cerca' })
       },
       (e) => {
+        track('geo_permission', { state: e.code === e.PERMISSION_DENIED ? 'denied' : 'error', location: 'cerca' })
         setState('error')
         setMsg(
           e.code === e.PERMISSION_DENIED
@@ -113,7 +116,7 @@ export function NearMe({ venues }: { venues: NearVenue[] }) {
       <ul className="flex flex-col gap-3">
         {sorted.map((n) => (
           <li key={n.venue.id}>
-            <Link href={`/${n.citySlug}/${n.venue.slug}`} className="flex items-center gap-4 rounded-2xl border-[1.5px] border-line bg-white p-4 transition hover:border-ink">
+            <Link href={`/${n.citySlug}/${n.venue.slug}`} data-track="select_venue" data-track-label={n.venue.name} data-track-location="cerca" data-track-distance={Math.round(n.d)} className="flex items-center gap-4 rounded-2xl border-[1.5px] border-line bg-white p-4 transition hover:border-ink">
               {n.score !== null && <ScoreBadge score={n.score} />}
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-display text-xl font-extrabold">{n.venue.name}</span>

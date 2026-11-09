@@ -90,6 +90,9 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/cerca"
+                data-track="cta_click"
+                data-track-label="cerca"
+                data-track-location="home_hero"
                 className="hidden items-center gap-2 rounded-2xl border border-amber/70 px-7 py-4 text-[17px] font-bold text-amber transition hover:bg-amber/10 md:flex"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
@@ -98,7 +101,7 @@ export default async function HomePage() {
                 </svg>
                 Bares cerca de mí
               </Link>
-              <Link href="/la-bodega" className="rounded-2xl border border-cream/40 px-7 py-4 text-[17px] font-bold transition hover:bg-cream/10">
+              <Link href="/la-bodega" data-track="cta_click" data-track-label="que_es_bodega" data-track-location="home_hero" className="rounded-2xl border border-cream/40 px-7 py-4 text-[17px] font-bold transition hover:bg-cream/10">
                 ¿Qué es la de bodega?
               </Link>
             </div>
@@ -230,7 +233,7 @@ export default async function HomePage() {
                 <p className="max-w-[520px] text-lg text-sand">
                   Publicamos cada local tras revisarlo. Si conoces uno donde la tiren de diez, cuéntanoslo.
                 </p>
-                <Link href="/sugerir" className="rounded-full bg-amber px-6 py-3.5 font-bold text-ink">
+                <Link data-track="cta_click" data-track-label="sugerir" href="/sugerir" className="rounded-full bg-amber px-6 py-3.5 font-bold text-ink">
                   Sugerir un bar
                 </Link>
               </div>
@@ -297,7 +300,7 @@ export default async function HomePage() {
               </Link>
             )
           })}
-          <Link href="/sugerir" className="flex min-h-[210px] flex-col justify-between rounded-[30px] bg-[#F3EEE2] p-6 transition hover:-translate-y-0.5">
+          <Link data-track="cta_click" data-track-label="sugerir" href="/sugerir" className="flex min-h-[210px] flex-col justify-between rounded-[30px] bg-[#F3EEE2] p-6 transition hover:-translate-y-0.5">
             <span className="text-sm font-semibold text-stone">Sugiere el primer bar</span>
             <span className="font-display text-[44px] font-extrabold leading-none tracking-[-0.03em]">+ Tu ciudad</span>
           </Link>
@@ -314,7 +317,7 @@ export default async function HomePage() {
               ¿Conoces un bar que la tire <span className="text-amber">bien</span>?
             </h2>
             <p className="text-lg text-sand">Sugiérelo y el equipo editorial lo revisa antes de publicarlo. Sin registro.</p>
-            <Link href="/sugerir" className="self-start rounded-full bg-amber px-7 py-4 font-extrabold text-ink">
+            <Link data-track="cta_click" data-track-label="sugerir" href="/sugerir" className="self-start rounded-full bg-amber px-7 py-4 font-extrabold text-ink">
               Sugerir un bar
             </Link>
           </div>

@@ -5,6 +5,7 @@ import Script from 'next/script'
 import { SITE_URL, GTM_ID, CONSENT_KEY } from '@/lib/site'
 import { CookieBanner } from '@/components/consent/cookie-banner'
 import { RegisterSW } from '@/components/mobile/pwa'
+import { ClickTracker } from '@/components/analytics/click-tracker'
 
 const APP_URL = SITE_URL
 
@@ -55,6 +56,7 @@ if(/(?:^|; )bfy-age=1/.test(document.cookie))document.documentElement.classList.
         {children}
         <CookieBanner />
         <RegisterSW />
+        <ClickTracker />
       </body>
     </html>
   )

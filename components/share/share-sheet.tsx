@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BRAND_ICONS } from "@/lib/share/brand-icons";
+import { track as trackEvent } from "@/lib/analytics";
 
 type Props = {
   /** URL absoluta de lo que se comparte */
@@ -21,9 +22,9 @@ type Props = {
   trigger: "icon" | "invite" | "tirada";
 };
 
+let currentItem = "";
 function track(method: string, campaign: string) {
-  const w = window as Window & { dataLayer?: unknown[] };
-  w.dataLayer?.push({ event: "share", method, content_type: campaign });
+  trackEvent("share", { method, content_type: campaign, item_id: currentItem });
 }
 
 function Logo({
@@ -77,6 +78,8 @@ export function ShareSheet(p: Props) {
   // Precarga las imágenes al abrir: el menú de compartir del móvil exige llamarse en el mismo toque
   useEffect(() => {
     if (!open) return;
+    currentItem = p.fileBase;
+    trackEvent("share_open", { location: p.trigger, content_type: p.campaign, item_id: p.fileBase });
     let alive = true;
     const load = async (src: string, name: string) => {
       const r = await fetch(src);
@@ -97,7 +100,7 @@ export function ShareSheet(p: Props) {
       alive = false;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, p.storyImg, p.postImg, p.fileBase]);
+  }, [open, p.storyImg, p.postImg, p.fileBase, p.trigger, p.campaign]);
 
   useEffect(() => {
     if (!toast) return;

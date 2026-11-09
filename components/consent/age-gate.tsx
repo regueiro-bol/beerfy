@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "@/components/brand/mark";
+import { track } from "@/lib/analytics";
 
 const COOKIE = "bfy-age";
 const EXEMPT = ["/privacidad", "/aviso-legal", "/como-puntuamos"];
@@ -19,6 +20,7 @@ export function AgeGate({ heroSrc }: { heroSrc: string }) {
   const path = usePathname() || "/";
 
   function yes() {
+    track('age_gate_answer', { answer: 'yes', remember })
     const maxAge = remember ? "; max-age=31536000" : "";
     document.cookie = `${COOKIE}=1; path=/; samesite=lax${maxAge}`;
     document.documentElement.classList.add("age-ok");
@@ -82,7 +84,10 @@ export function AgeGate({ heroSrc }: { heroSrc: string }) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setState("no")}
+                    onClick={() => {
+                      track("age_gate_answer", { answer: "no" });
+                      setState("no");
+                    }}
                     className="h-[54px] rounded-[18px] border-[1.5px] border-cream/45 text-[16px] font-semibold"
                   >
                     Todavía no
