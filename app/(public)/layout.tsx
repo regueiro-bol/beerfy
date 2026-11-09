@@ -1,5 +1,7 @@
 import { SiteFooter } from '@/components/site/chrome'
 import { MobileTabBar } from '@/components/mobile/tab-bar'
+import { AgeGate } from '@/components/consent/age-gate'
+import { IMG } from '@/lib/content/images'
 
 /** Cada página pinta su propia cabecera (sobre foto o sólida). */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -8,6 +10,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       {children}
       <SiteFooter />
       <MobileTabBar />
+      <AgeGate heroSrc={IMG.hero.src} />
     </div>
   )
 }

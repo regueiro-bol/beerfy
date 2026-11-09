@@ -149,3 +149,7 @@
 @media (prefers-reduced-motion: reduce) {
   .bfy-marquee, .bfy-float { animation: none }
 }
+
+/* Muro de edad: oculto si ya hay cookie (clase puesta antes de pintar) y sin scroll mientras está abierto */
+html.age-ok #age-gate { display: none; }
+html:not(.age-ok):has(#age-gate) body { overflow: hidden; }
