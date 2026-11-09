@@ -145,12 +145,29 @@ export default async function VenueDetailPage({ params }: PageProps) {
               ))}
             </div>
           </div>
-          <div className="rotate-3 rounded-3xl bg-amber p-1 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.6)]">
-            <ScoreBadge score={score} size="lg" />
-            <p className="px-3 pb-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] text-ink">
-              {score !== null ? `Nota de tirada · ${votes} votos` : votes > 0 ? `En calibración · ${votes} de ${MIN_VOTES} votos` : 'Sin puntuaciones aún'}
-            </p>
-          </div>
+          {score !== null ? (
+            <div className="rotate-3 rounded-3xl bg-amber p-1 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.6)]">
+              <ScoreBadge score={score} size="lg" />
+              <p className="px-3 pb-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] text-ink">Nota de tirada · {votes} votos</p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-2xl border border-cream/25 bg-ink/50 px-4 py-3 backdrop-blur">
+              {votes > 0 ? (
+                <>
+                  <span className="flex gap-1" aria-hidden="true">
+                    {Array.from({ length: MIN_VOTES }).map((_, i) => (
+                      <span key={i} className={`h-2.5 w-2.5 rounded-full ${i < votes ? 'bg-amber' : 'bg-cream/25'}`} />
+                    ))}
+                  </span>
+                  <span className="text-sm font-semibold">
+                    Nota en calibración · {votes} de {MIN_VOTES}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm font-semibold">Aún sin nota · sé el primero en puntuar</span>
+              )}
+            </div>
+          )}
         </div>
       </section>
       <FoamEdge />
