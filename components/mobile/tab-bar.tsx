@@ -60,6 +60,9 @@ export function MobileTabBar() {
               <li key={t.href} className="flex justify-center">
                 <Link
                   href={t.href}
+                  data-track="nav_click"
+                  data-track-label={t.label}
+                  data-track-location="tabbar"
                   aria-current={active ? 'page' : undefined}
                   className="-mt-5 flex flex-col items-center gap-1 pb-2"
                 >
@@ -78,6 +81,9 @@ export function MobileTabBar() {
             <li key={t.href}>
               <Link
                 href={t.href}
+                data-track="nav_click"
+                data-track-label={t.label}
+                data-track-location="tabbar"
                 aria-current={active ? 'page' : undefined}
                 className={`flex min-h-[60px] flex-col items-center justify-center gap-1 text-[11px] font-semibold ${
                   active ? 'text-amber' : 'text-sand'

@@ -22,6 +22,9 @@ export function VenueCard({ href, name, place, coverUrl, coverCredit, score, vot
   return (
     <div className="relative">
     <Link
+      data-track="select_venue"
+      data-track-label={name}
+      data-track-location="card"
       href={href}
       className={`group relative block overflow-hidden rounded-[32px] bg-[#1C1812] ${tall ? 'h-[460px] md:h-[520px]' : 'h-[340px]'}`}
     >

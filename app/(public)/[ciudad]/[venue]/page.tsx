@@ -234,7 +234,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
                   : 'Sé el primero: temperatura, espuma, vaso y frescura en 30 segundos, desde el propio bar.'}
               </p>
             )}
-            <Link href={ratePath} className="self-start rounded-2xl bg-amber px-6 py-4 text-[17px] font-extrabold text-ink transition hover:brightness-95">
+            <Link href={ratePath} data-track="rate_cta" data-track-location="ficha" data-track-item-id={venue.slug} className="self-start rounded-2xl bg-amber px-6 py-4 text-[17px] font-extrabold text-ink transition hover:brightness-95">
               Puntuar mi tirada
             </Link>
           </div>
@@ -286,7 +286,7 @@ export default async function VenueDetailPage({ params }: PageProps) {
               <a href={`tel:${phone}`} className="flex gap-3 text-[15px] hover:underline"><Phone className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />{phone}</a>
             )}
             {website && (
-              <a href={website} target="_blank" rel="noopener noreferrer" className="flex gap-3 break-all text-[15px] hover:underline">
+              <a data-track="click_website" data-track-item-id={venue.slug} href={website} target="_blank" rel="noopener noreferrer" className="flex gap-3 break-all text-[15px] hover:underline">
                 <Globe className="h-5 w-5 shrink-0 text-amber" aria-hidden="true" />Web del local
               </a>
             )}

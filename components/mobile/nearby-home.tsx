@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { distanceM, formatDistance, isTouchDevice } from '@/lib/geo/distance'
 import { formatScore } from '@/components/site/chrome'
+import { track } from '@/lib/analytics'
 
 export type NearbyItem = {
   id: string
@@ -39,10 +40,12 @@ export function NearbyHome({ items }: { items: NearbyItem[] }) {
       (p) => {
         setMe({ lat: p.coords.latitude, lng: p.coords.longitude })
         setPerm('granted')
+        track('geo_permission', { state: 'granted', location: 'home' })
         setLocating(false)
       },
       (e) => {
         setLocating(false)
+        track('geo_permission', { state: e.code === e.PERMISSION_DENIED ? 'denied' : 'error', location: 'home' })
         if (e.code === e.PERMISSION_DENIED) setPerm('denied')
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 }
@@ -121,7 +124,7 @@ export function NearbyHome({ items }: { items: NearbyItem[] }) {
         <ul className="flex flex-col gap-2.5">
           {nearest.map((n) => (
             <li key={n.id}>
-              <Link href={n.href} className="flex items-center gap-3 rounded-[20px] bg-white/[0.08] p-2.5 pr-4 backdrop-blur">
+              <Link href={n.href} data-track="select_venue" data-track-label={n.name} data-track-location="cerca_home" data-track-distance={Math.round(n.d)} className="flex items-center gap-3 rounded-[20px] bg-white/[0.08] p-2.5 pr-4 backdrop-blur">
                 {n.cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={n.cover} alt="" className="h-14 w-14 flex-none rounded-2xl object-cover" />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { isTouchDevice } from '@/lib/geo/distance'
+import { track } from '@/lib/analytics'
 
 const DISMISS_KEY = 'bfy-install-dismissed'
 
@@ -10,7 +11,10 @@ type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ out
 /** Registra el service worker (necesario para instalar Beerfy como app). */
 export function RegisterSW() {
   useEffect(() => {
+    const onInstalled = () => track('pwa_installed', {})
+    window.addEventListener('appinstalled', onInstalled)
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {})
+    return () => window.removeEventListener('appinstalled', onInstalled)
   }, [])
   return null
 }
@@ -43,6 +47,7 @@ export function InstallApp() {
   }, [])
 
   function dismiss() {
+    track('pwa_dismiss', { platform: mode })
     try {
       localStorage.setItem(DISMISS_KEY, '1')
     } catch {}
@@ -71,6 +76,7 @@ export function InstallApp() {
             <button
               type="button"
               onClick={async () => {
+                track('pwa_install', { platform: 'android' })
                 await evt.prompt()
                 await evt.userChoice.catch(() => null)
                 setMode('none')

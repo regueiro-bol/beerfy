@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useRef, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { submitRating, type RateState } from './actions'
 import { ShareSheet } from '@/components/share/share-sheet'
 import { SITE_URL } from '@/lib/site'
+import { track } from '@/lib/analytics'
 
 const CRITERIA = [
   { key: 'score_temperature', n: '01', name: 'Temperatura', hint: 'Fría, pero que sepa', tint: 'bg-bottle text-cream' },
@@ -27,6 +28,12 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
   const accRef = useRef<HTMLInputElement>(null)
   const done = Object.values(v).every((x) => x > 0)
 
+  useEffect(() => {
+    const item_id = path.split('/').pop()
+    if (state.ok) track('rate_submit', { item_id, score: state.score ?? null, pending: !!state.pending })
+    else if (state.error) track('rate_error', { item_id, reason: state.error.slice(0, 60) })
+  }, [state, path])
+
   function locateAndSubmit() {
     if (!('geolocation' in navigator)) {
       setGeo('error')
@@ -44,6 +51,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
         formRef.current?.requestSubmit()
       },
       (err) => {
+        track('rate_error', { reason: err.code === err.PERMISSION_DENIED ? 'geo_denied' : 'geo_unavailable', item_id: path.split('/').pop() })
         setGeo('error')
         setGeoMsg(
           err.code === err.PERMISSION_DENIED

@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
+import { track } from '@/lib/analytics'
 import { submitSuggestion, type SuggestState } from './actions'
 
 type City = { id: string; name: string; slug: string }
@@ -13,6 +14,10 @@ export function SuggestForm({ cities, defaultCity }: { cities: City[]; defaultCi
   const initialId = cities.find((c) => c.slug === defaultCity)?.id ?? ''
   const [cityId, setCityId] = useState(initialId)
   const [notify, setNotify] = useState(false)
+
+  useEffect(() => {
+    if (state.ok) track('suggest_submit', {})
+  }, [state.ok])
 
   if (state.ok) {
     return (

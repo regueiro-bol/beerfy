@@ -50,6 +50,8 @@ export function RateSticky({ venueName, lat, lng, href }: { venueName: string; l
       <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-30 border-t border-line bg-paper/95 px-4 pb-3 pt-3 backdrop-blur">
         <Link
           href={href}
+          data-track="rate_cta"
+          data-track-location={near ? 'sticky_near' : 'sticky'}
           className="flex h-14 w-full items-center justify-center rounded-2xl bg-amber px-4 text-center text-[16px] font-extrabold text-ink"
         >
           {near ? `¿Estás en ${venueName}? Puntúa tu caña` : 'Puntuar mi tirada'}
