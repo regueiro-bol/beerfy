@@ -32,6 +32,7 @@ Los enlaces compartidos llevan `utm_source` (red), `utm_medium=share`, `utm_camp
 
 Antes de cargar GTM, la web empuja `{display_mode: 'app' | 'navegador'}` al dataLayer
 (`app` = abierta desde el icono instalado, modo standalone). En GTM la variable
-`DLV - display_mode` se envía como parámetro de configuración de la etiqueta de Google,
-así que viaja con **todos** los eventos (page_view incluido). En GA4 es la dimensión
-personalizada «Modo de apertura».
+`DLV - display_mode` va en la variable de ajustes compartidos `GT - Ajustes compartidos`,
+viaja con los eventos de la web. Además se fija la propiedad de usuario `modo_apertura`
+(`gtag('set','user_properties',…)`), que sí acompaña al page_view. En GA4: dimensión de
+usuario «Modo de apertura» (`modo_apertura`) y de evento «Modo (evento)» (`display_mode`).
