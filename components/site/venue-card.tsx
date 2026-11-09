@@ -44,9 +44,11 @@ export function VenueCard({ href, name, place, coverUrl, coverCredit, score, vot
       {rank !== undefined && (
         <span className="absolute left-5 top-5 rounded-full bg-cream px-3.5 py-2 text-sm font-extrabold text-ink">#{rank}</span>
       )}
-      <span className="absolute right-5 top-5">
-        <ScoreBadge score={score} size="lg" />
-      </span>
+      {score !== null && (
+        <span className="absolute right-5 top-5">
+          <ScoreBadge score={score} size="lg" />
+        </span>
+      )}
       <div className="absolute inset-x-6 bottom-6 flex flex-col gap-1.5 text-cream">
         <p className="font-display text-[30px] font-extrabold leading-none tracking-[-0.02em] md:text-[34px]">{name}</p>
         <p className="text-[15px] text-sand">{place.replace(/,\s*(Spain|España)$/i, '')}</p>

@@ -114,7 +114,7 @@ export function NearMe({ venues }: { venues: NearVenue[] }) {
         {sorted.map((n) => (
           <li key={n.venue.id}>
             <Link href={`/${n.citySlug}/${n.venue.slug}`} className="flex items-center gap-4 rounded-2xl border-[1.5px] border-line bg-white p-4 transition hover:border-ink">
-              <ScoreBadge score={n.score} />
+              {n.score !== null && <ScoreBadge score={n.score} />}
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-display text-xl font-extrabold">{n.venue.name}</span>
                 <span className="block truncate text-sm text-stone">{n.venue.address?.replace(/,\s*(Spain|España)$/i, '')}</span>
