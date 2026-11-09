@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useActionState, useRef, useState } from 'react'
 import { submitRating, type RateState } from './actions'
+import { ShareSheet } from '@/components/share/share-sheet'
+import { SITE_URL } from '@/lib/site'
 
 const CRITERIA = [
   { key: 'score_temperature', n: '01', name: 'Temperatura', hint: 'Fría, pero que sepa', tint: 'bg-bottle text-cream' },
@@ -58,14 +60,61 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
   const foamH = 6 + v.score_foam * 3
 
   if (state.ok) {
+    const score = (state.score ?? 0).toFixed(1).replace('.', ',')
+    const story = state.ratingId ? `/api/card/tirada/${state.ratingId}` : null
     return (
-      <div className="flex flex-col items-start gap-5 rounded-[32px] bg-bottle p-8 text-cream md:p-12">
-        <p className="font-display text-[44px] font-extrabold leading-none">¡Gracias!</p>
-        <p className="text-lg text-sand">
-          Tu nota para {venueName}: <strong className="text-amber">{state.score?.toFixed(1).replace('.', ',')}</strong>.{' '}
-          {state.pending ? 'La revisaremos antes de publicarla.' : 'Ya cuenta en la Nota de tirada.'}
-        </p>
-        <Link href={path} className="rounded-full bg-amber px-6 py-3.5 font-bold text-ink">Volver a la ficha</Link>
+      <div className="flex flex-col gap-6 rounded-[32px] bg-ink p-7 text-cream md:flex-row md:items-center md:gap-10 md:p-12">
+        <div className="flex flex-1 flex-col gap-4">
+          <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-amber">¡Gracias!</p>
+          <p className="font-display text-[40px] font-extrabold leading-[0.95] tracking-[-0.03em]">
+            Tu tirada en {venueName}: <span className="text-amber">{score}</span>
+          </p>
+          <p className="text-[15px] text-sand">{state.pending ? 'La revisaremos antes de publicarla.' : 'Ya cuenta en la Nota de tirada.'}</p>
+          {story && (
+            <div className="hidden md:block">
+              <ShareSheet
+                url={`${SITE_URL}${path}`}
+                title={venueName}
+                text={`Mi tirada en ${venueName}: ${score} de 10. ¿Y a ti, cómo te la tiran?`}
+                storyImg={story}
+                fileBase={`mi-tirada-${path.split('/').pop()}`}
+                heading="Comparte tu tirada"
+                sub="Tu nota y tus criterios en una historia lista para subir."
+                campaign="tirada"
+                trigger="tirada"
+              />
+            </div>
+          )}
+          <Link href={path} className="hidden self-start rounded-full border-[1.5px] border-cream/40 px-6 py-3 font-semibold md:inline-block">
+            Volver a la ficha
+          </Link>
+        </div>
+        {story && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={story}
+            alt={`Historia «Mi tirada» en ${venueName} con nota ${score}`}
+            className="mx-auto w-[210px] -rotate-3 rounded-[18px] shadow-[0_30px_50px_-20px_rgba(0,0,0,.8)] md:w-[240px]"
+          />
+        )}
+        <div className="flex flex-col gap-2.5 md:hidden">
+          {story && (
+            <ShareSheet
+              url={`${SITE_URL}${path}`}
+              title={venueName}
+              text={`Mi tirada en ${venueName}: ${score} de 10. ¿Y a ti, cómo te la tiran?`}
+              storyImg={story}
+              fileBase={`mi-tirada-${path.split('/').pop()}`}
+              heading="Comparte tu tirada"
+              sub="Tu nota y tus criterios en una historia lista para subir."
+              campaign="tirada"
+              trigger="tirada"
+            />
+          )}
+          <Link href={path} className="flex h-12 items-center justify-center rounded-[18px] border-[1.5px] border-cream/40 font-semibold">
+            Volver a la ficha
+          </Link>
+        </div>
       </div>
     )
   }

@@ -5,7 +5,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 
-export type RateState = { ok: boolean; error?: string; score?: number; pending?: boolean }
+export type RateState = { ok: boolean; error?: string; score?: number; pending?: boolean; ratingId?: string }
 
 const KEYS = ['score_temperature', 'score_foam', 'score_glass', 'score_freshness'] as const
 
@@ -92,7 +92,7 @@ export async function submitRating(_prev: RateState, formData: FormData): Promis
   const status = (lastHour ?? 0) >= BURST_PER_HOUR ? 'pendiente' : 'visible'
 
   const avg = (scores.score_temperature! + scores.score_foam! + scores.score_glass! + scores.score_freshness!) / 4
-  const { error } = await supabase.from('ratings').insert({
+  const { data: inserted, error } = await supabase.from('ratings').insert({
     venue_id: venueId,
     rating: Math.round(avg),
     ...scores,
@@ -100,12 +100,12 @@ export async function submitRating(_prev: RateState, formData: FormData): Promis
     ip_hash: ipHash,
     user_agent: (h.get('user-agent') || '').slice(0, 300),
     status,
-  })
+  }).select('id').single()
   if (error) {
     console.error('Error saving rating:', error)
     return { ok: false, error: 'No hemos podido guardar tu nota. Inténtalo de nuevo.' }
   }
 
   if (path.startsWith('/')) revalidatePath(path)
-  return { ok: true, score: avg * 2, pending: status === 'pendiente' }
+  return { ok: true, score: avg * 2, pending: status === 'pendiente', ratingId: inserted?.id as string | undefined }
 }

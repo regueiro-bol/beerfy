@@ -10,6 +10,7 @@ import CityMap from '@/components/feature/city-map/CityMap'
 import { RateSticky } from '@/components/mobile/rate-sticky'
 import { MapPin, Phone, Globe, Clock } from 'lucide-react'
 import { SITE_URL } from '@/lib/site'
+import { ShareSheet } from '@/components/share/share-sheet'
 
 const APP_URL = SITE_URL
 
@@ -45,6 +46,23 @@ export default async function VenueDetailPage({ params }: PageProps) {
   ])
   const { score, votes } = scores[venue.id] ?? { score: null, votes: 0 }
   const ratePath = `/${city.slug}/${venue.slug}/puntuar`
+  const cardBase = `/api/card/${city.slug}/${venue.slug}`
+  const shareProps = {
+    url: `${SITE_URL}/${city.slug}/${venue.slug}`,
+    title: venue.name,
+    text:
+      score !== null
+        ? `${venue.name} tira la cerveza de bodega con un ${formatScore(score)} en Beerfy. ¿Vamos?`
+        : `${venue.name} tiene cerveza de bodega en tanque. ¿Vamos a por una caña?`,
+    storyImg: `${cardBase}?f=story`,
+    postImg: `${cardBase}?f=post`,
+    fileBase: venue.slug,
+    heading: 'Invita a una caña aquí',
+    sub: 'Se envía la tarjeta del bar con su nota y el enlace.',
+    campaign: 'ficha' as const,
+    thumb: venue.cover_image_url ?? null,
+    thumbLabel: score !== null ? formatScore(score) : null,
+  }
   const phone = live?.phone ?? venue.phone
   const website = live?.website ?? venue.website
   const CRIT = [
@@ -97,6 +115,9 @@ export default async function VenueDetailPage({ params }: PageProps) {
             · <span translate="no">Google Maps</span>
           </p>
         )}
+        <div className="absolute right-5 top-4 z-30 md:right-8 md:top-28">
+          <ShareSheet {...shareProps} trigger="icon" />
+        </div>
         <div className="relative mx-auto flex max-w-[1320px] flex-wrap items-end justify-between gap-8 px-5 pb-14 pt-24 md:px-8 md:pt-40">
           <div className="max-w-[820px]">
             <nav aria-label="Migas de pan" className="mb-5 flex flex-wrap gap-2 text-sm text-sand">
@@ -200,6 +221,8 @@ export default async function VenueDetailPage({ params }: PageProps) {
               Puntuar mi tirada
             </Link>
           </div>
+
+          <ShareSheet {...shareProps} trigger="invite" />
 
           {criteria.comments.length > 0 && (
             <div>
