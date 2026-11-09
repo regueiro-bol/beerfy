@@ -1,4 +1,4 @@
-# Analítica de Beerfy (GTM GTM-PT28ZG5D → GA4)
+# Analítica de Beerfy (GTM GTM-TXZC7VZR → GA4)
 
 La web empuja eventos al `dataLayer`. En Tag Manager:
 
