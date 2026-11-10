@@ -24,7 +24,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const vals = crit.map((c) => c.v).filter((x): x is number => x !== null)
   const score = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : Number(r.rating) * 2
   const [fonts, img] = await Promise.all([loadFonts(), loadImage(v?.cover_image_url ?? null)])
-  const date = new Date(r.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', timeZone: 'Europe/Madrid' })
+  const date = new Date(r.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'Europe/Madrid' })
   return new ImageResponse(
     <TiradaStory venue={v?.name ?? 'Beerfy'} score={score} crit={crit} comment={r.status === 'visible' ? r.comment : null} img={img} date={date} />,
     { width: 1080, height: 1920, fonts, headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' } }

@@ -1,3 +1,4 @@
+import { formatScore } from "@/lib/format";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -330,7 +331,7 @@ export default async function EstrellaGaliciaBodegaPage() {
                         </Link>
                         {s?.score !== null && s?.score !== undefined && (
                           <span className="shrink-0 rounded-full bg-amber px-2 py-0.5 text-xs font-bold text-ink">
-                            {s.score.toFixed(1)}
+                            {formatScore(s.score)}
                           </span>
                         )}
                       </li>
