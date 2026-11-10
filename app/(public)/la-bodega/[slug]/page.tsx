@@ -120,7 +120,7 @@ export default async function ChapterPage({ params }: PageProps) {
           <div className="relative h-[300px] overflow-hidden rounded-[28px] md:h-[520px]">
             <Image
               src={IMG[c.image]}
-              alt=""
+              alt={c.imageAlt ?? ""}
               fill
               preload
               sizes="(max-width: 1240px) 100vw, 1240px"
@@ -128,7 +128,7 @@ export default async function ChapterPage({ params }: PageProps) {
               placeholder="blur"
             />
             <span className="absolute bottom-3 right-4 text-xs text-cream/80">
-              Imagen de ambiente generada con IA
+              {c.imageCaption ?? "Imagen de ambiente generada con IA"}
             </span>
           </div>
         </div>

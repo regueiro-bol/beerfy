@@ -68,6 +68,10 @@ const FAQ = [
     a: "La de barril se pasteuriza antes de envasarse para aguantar más tiempo fuera del frío. La de bodega no se pasteuriza, viaja en cisterna refrigerada y se descarga en tanques fijos del bar.",
   },
   {
+    q: "¿Por qué tiene menos gas que la de barril?",
+    a: "En el tanque, la cerveza va dentro de una bolsa estéril. El aire o el gas que la empuja hacia el grifo aprieta la bolsa, pero no toca la cerveza: no se oxida ni gana gas al servirla y conserva la carbonatación de fábrica. En un barril, el CO₂ presiona directamente sobre la cerveza.",
+  },
+  {
     q: "¿Dónde se puede tomar?",
     a: "Solo en bares con tanques de cerveza de bodega. En Beerfy los tienes por ciudad, con la Nota de tirada que ponen quienes se la beben.",
   },
@@ -173,7 +177,7 @@ export default async function EstrellaGaliciaBodegaPage() {
       <section className="relative overflow-hidden bg-ink text-cream">
         <Image
           src={IMG.tankEg}
-          alt="Tanque de Estrella Galicia Cerveza de Bodega, sin pasteurizar, instalado en un bar"
+          alt="Tanque de Estrella Galicia Cerveza de Bodega, sin pasteurizar, en el bar Vivian de Ourense"
           fill
           preload
           sizes="100vw"
@@ -228,6 +232,11 @@ export default async function EstrellaGaliciaBodegaPage() {
             cisterna refrigerada y se descarga en los tanques del bar.
           </p>
           <p>
+            Dentro del tanque, la cerveza va en una bolsa estéril. El aire o el gas que la empuja hasta el grifo aprieta la bolsa,
+            pero no toca la cerveza: no se oxida y no gana gas al servirla. Por eso conserva la carbonatación de fábrica y se nota
+            más suave que la de barril, donde el CO₂ presiona directamente sobre la cerveza.
+          </p>
+          <p>
             Esos tanques son la pista para reconocerla: suelen estar a la vista,
             en la barra o en una sala del local, con la imagen de Cerveza de
             Bodega. Hijos de Rivera, la empresa que la elabora, también la
@@ -249,7 +258,7 @@ export default async function EstrellaGaliciaBodegaPage() {
             <div className="relative aspect-[4/5] overflow-hidden rounded-3xl md:aspect-[4/3]">
               <Image
                 src={IMG.tanksCopper}
-                alt="Dos tanques de cobre de Estrella Galicia Cerveza de Bodega apilados en un bar"
+                alt="Dos tanques de cobre de Estrella Galicia Cerveza de Bodega apilados en el bar Vivian, en Ourense"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover object-top"
@@ -257,7 +266,7 @@ export default async function EstrellaGaliciaBodegaPage() {
               />
             </div>
             <figcaption className="font-sans text-sm text-stone">
-              Tanques de Cerveza de Bodega a la vista en un bar. Foto: Beerfy.
+              Tanques de Cerveza de Bodega en Vivian (Ourense). Foto: Beerfy.
             </figcaption>
           </figure>
         </div>

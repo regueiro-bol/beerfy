@@ -150,6 +150,8 @@ export const CHAPTERS: Chapter[] = [
     short: "Donde se gana o se pierde la cerveza.",
     category: "En el bar",
     image: "tankEg",
+    imageAlt: "Tanque de Estrella Galicia Cerveza de Bodega, sin pasteurizar, instalado en un bar",
+    imageCaption: "Tanque de Cerveza de Bodega en Vivian (Ourense). Foto: Beerfy",
     minutes: 5,
     lead: "El tanque del bar es la última parada antes del grifo. Tener uno exige espacio, volumen de venta y mucha disciplina.",
     summary: [
@@ -262,11 +264,14 @@ export const CHAPTERS: Chapter[] = [
       "Pasteurización, envase y camino hasta el bar: lo que cambia entre una y otra.",
     category: "Qué es",
     image: "tanksCopper",
+    imageAlt: "Dos tanques de cobre de Estrella Galicia Cerveza de Bodega apilados en un bar",
+    imageCaption: "Tanques de Cerveza de Bodega en Vivian (Ourense). Foto: Beerfy",
     minutes: 5,
     lead: "Las dos salen de un grifo y pueden partir de la misma receta. Lo que cambia es lo que pasa entre la fábrica y el vaso: si se pasteuriza, en qué viaja y cómo se guarda en el bar.",
     summary: [
       "La de barril suele pasteurizarse justo antes de envasarse, para aguantar semanas fuera de fábrica.",
       "La de bodega no se pasteuriza: viaja en cisterna refrigerada y se descarga en tanques fijos del bar.",
+      "En el tanque, el gas empuja una bolsa pero no toca la cerveza: no se oxida ni gana gas al servirla.",
       "Por eso la de bodega depende mucho más del frío, la limpieza y la rotación del local.",
       "En el vaso manda la tirada: una de bodega mal servida pierde frente a una de barril bien cuidada.",
     ],
@@ -285,6 +290,14 @@ export const CHAPTERS: Chapter[] = [
         body: [
           "El barril es un envase de acero que sale lleno de la fábrica, se almacena en el bar y se conecta al grifo. Cuando se vacía, se cambia por otro.",
           "La cerveza de bodega no usa barriles. Llega en una cisterna refrigerada y se trasvasa a tanques fijos instalados en el local, desde donde va directa al grifo. En el caso de Estrella Galicia, la marca explica que la cerveza viaja y se conserva dentro de una bolsa estéril de un solo uso, tanto en la cisterna como en el tanque del bar.",
+        ],
+      },
+      {
+        id: "gas",
+        title: "El gas: empuja, pero no toca",
+        body: [
+          "Para que la cerveza llegue al grifo hay que empujarla. En un barril, el CO₂ entra en el propio barril y presiona directamente sobre la cerveza. Si la presión no está bien ajustada, la cerveza puede salir con más gas del que traía, o perderlo.",
+          "En los tanques de cerveza de bodega la cerveza va dentro de una bolsa estéril. El aire comprimido o el gas entran entre la bolsa y la pared del tanque y aprietan la bolsa, pero nunca tocan la cerveza. Así no absorbe oxígeno, que es lo que la oxida y le apaga el aroma, y no gana gas al servirla: conserva la carbonatación con la que sale de fábrica. Por eso se nota más suave y menos gaseosa.",
         ],
       },
       {
@@ -313,6 +326,9 @@ export const CHAPTERS: Chapter[] = [
       },
     ],
     sources: [
+      { label: "Paul Mueller — Serving Beer Tanks: sistema bag-in-tank empujado por aire", url: "https://en.paulmueller.com/hubfs/Brewing/Downloads/NL-Downloads/English/2022%20EN%20-%20Brochure%20Low.Res.%20Serving%20Beer%20Tanks.pdf" },
+      { label: "Brew Your Own — Cerveza en bolsa: el forro separa la cerveza del gas de empuje", url: "https://byo.com/mr-wizard/cask-ale-beer-in-a-bag/" },
+      { label: "Tanques «bag in»: el aire comprimido no toca la cerveza ni le aporta oxígeno", url: "https://www.craftbreweryequipment.com/products/200l-to-100hl-bag-in-brite-tank" },
       {
         label: "Estrella Galicia — Cerveza de Bodega (ficha de producto)",
         url: "https://estrellagalicia.es/producto/estrella-galicia-cerveza-de-bodega/",
@@ -346,6 +362,8 @@ export const CHAPTERS: Chapter[] = [
       "Quién sirve cerveza de tanque en España y en qué se parecen sus sistemas.",
     category: "Qué es",
     image: "glass1906",
+    imageAlt: "Caña de 1906 de Bodega servida en copa La Milnueve",
+    imageCaption: "Caña de 1906 de Bodega en Vivian (Ourense). Foto: Beerfy",
     minutes: 4,
     lead: "La cerveza de bodega no es una marca: es una forma de servir la cerveza. En España la ofrecen sobre todo dos grandes cerveceras, cada una con sus marcas y su propio sistema de tanques.",
     summary: [
@@ -418,6 +436,10 @@ export const CHAPTERS: Chapter[] = [
 ];
 
 export const FAQ = [
+  {
+    q: "¿Por qué la cerveza de bodega tiene menos gas?",
+    a: "Porque en el tanque va dentro de una bolsa: el aire o el gas que la empuja hacia el grifo aprieta la bolsa pero no toca la cerveza. No absorbe oxígeno ni gana gas al servirla, así que mantiene la carbonatación de fábrica. En un barril, en cambio, el CO₂ empuja directamente sobre la cerveza.",
+  },
   {
     q: "¿Qué marcas sirven cerveza de bodega?",
     a: "En España, sobre todo Hijos de Rivera (Estrella Galicia de Bodega y 1906 de Bodega) y Mahou San Miguel, que fue pionera con el tanque de San Miguel en 1997 y hoy también lo ofrece con Mahou.",
