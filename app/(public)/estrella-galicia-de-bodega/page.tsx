@@ -171,12 +171,12 @@ export default async function EstrellaGaliciaBodegaPage() {
 
       <section className="relative overflow-hidden bg-ink text-cream">
         <Image
-          src={IMG.pour}
-          alt=""
+          src={IMG.tankEg}
+          alt="Tanque de Estrella Galicia Cerveza de Bodega, sin pasteurizar, instalado en un bar"
           fill
           preload
           sizes="100vw"
-          className="object-cover opacity-50"
+          className="object-cover opacity-55"
           placeholder="blur"
         />
         <div
