@@ -244,6 +244,21 @@ export default async function EstrellaGaliciaBodegaPage() {
             </Link>
             .
           </p>
+          <figure className="mt-2 flex flex-col gap-2">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl md:aspect-[4/3]">
+              <Image
+                src={IMG.tanksCopper}
+                alt="Dos tanques de cobre de Estrella Galicia Cerveza de Bodega apilados en un bar"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover object-top"
+                placeholder="blur"
+              />
+            </div>
+            <figcaption className="font-sans text-sm text-stone">
+              Tanques de Cerveza de Bodega a la vista en un bar. Foto: Beerfy.
+            </figcaption>
+          </figure>
         </div>
         <div className="self-start rounded-3xl border-[1.5px] border-[#16140F] bg-white p-6 md:p-8">
           <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.1em] text-bottle">

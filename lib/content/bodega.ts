@@ -11,7 +11,15 @@ export type Chapter = {
   short: string;
   category:
     "Qué es" | "Fabricación" | "Logística" | "En el bar" | "Degustación";
-  image: "tanks" | "truck" | "pour" | "hero" | "foam";
+  image:
+    | "tanks"
+    | "truck"
+    | "pour"
+    | "hero"
+    | "foam"
+    | "tanksCopper"
+    | "tankEg"
+    | "glass1906";
   minutes: number;
   lead: string;
   summary: string[];
@@ -141,7 +149,7 @@ export const CHAPTERS: Chapter[] = [
     title: "En el bar: tanque, limpieza y rotación",
     short: "Donde se gana o se pierde la cerveza.",
     category: "En el bar",
-    image: "pour",
+    image: "tankEg",
     minutes: 5,
     lead: "El tanque del bar es la última parada antes del grifo. Tener uno exige espacio, volumen de venta y mucha disciplina.",
     summary: [
@@ -253,7 +261,7 @@ export const CHAPTERS: Chapter[] = [
     short:
       "Pasteurización, envase y camino hasta el bar: lo que cambia entre una y otra.",
     category: "Qué es",
-    image: "tanks",
+    image: "tanksCopper",
     minutes: 5,
     lead: "Las dos salen de un grifo y pueden partir de la misma receta. Lo que cambia es lo que pasa entre la fábrica y el vaso: si se pasteuriza, en qué viaja y cómo se guarda en el bar.",
     summary: [
@@ -337,7 +345,7 @@ export const CHAPTERS: Chapter[] = [
     short:
       "Quién sirve cerveza de tanque en España y en qué se parecen sus sistemas.",
     category: "Qué es",
-    image: "truck",
+    image: "glass1906",
     minutes: 4,
     lead: "La cerveza de bodega no es una marca: es una forma de servir la cerveza. En España la ofrecen sobre todo dos grandes cerveceras, cada una con sus marcas y su propio sistema de tanques.",
     summary: [
