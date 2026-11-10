@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${APP_URL}/la-bodega` },
 }
 
-const SPANS = ['md:col-span-7', 'md:col-span-5', 'md:col-span-5', 'md:col-span-7']
+const SPANS = ['md:col-span-7', 'md:col-span-5', 'md:col-span-5', 'md:col-span-7', 'md:col-span-6', 'md:col-span-6']
 
 export default function BodegaHubPage() {
   const first = CHAPTERS[0]!
@@ -97,6 +97,20 @@ export default function BodegaHubPage() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-[1320px] px-5 pb-16 md:px-8">
+        <Link
+          href="/estrella-galicia-de-bodega"
+          className="flex flex-wrap items-center justify-between gap-6 rounded-[34px] bg-bottle p-8 text-cream md:p-12"
+        >
+          <div className="flex max-w-[720px] flex-col gap-3">
+            <p className="text-[13px] font-bold uppercase tracking-[0.12em] text-amber">Guía de marca</p>
+            <p className="font-display text-[34px] font-extrabold leading-none md:text-[48px]">Estrella Galicia de Bodega: qué es y dónde tomarla</p>
+            <p className="text-lg text-sand">Ficha, preguntas frecuentes y todos los bares que la sirven, ciudad a ciudad.</p>
+          </div>
+          <span className="rounded-full bg-amber px-6 py-3.5 font-extrabold text-ink">Ver la guía →</span>
+        </Link>
       </section>
 
       <section className="mx-auto flex max-w-[1320px] flex-wrap gap-10 px-5 pb-24 md:px-8">
