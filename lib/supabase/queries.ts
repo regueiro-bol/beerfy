@@ -174,7 +174,14 @@ export async function getRankedVenues(limit = 3): Promise<Array<VenueWithCity & 
   const scores = await getVenueScores(venues.map((v) => v.id))
   return venues
     .map((v) => ({ ...v, score: scores[v.id]?.score ?? null, votes: scores[v.id]?.votes ?? 0 }))
-    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || b.votes - a.votes)
+    // Con nota: por nota y, a igualdad, por votos. Sin nota: se respeta el orden por fecha de alta
+    // (los votos sueltos por debajo del mínimo no deben fijar a nadie arriba de «Recién llegados»).
+    .sort((a, b) => {
+      if (a.score !== null && b.score !== null) return b.score - a.score || b.votes - a.votes
+      if (a.score !== null) return -1
+      if (b.score !== null) return 1
+      return 0
+    })
     .slice(0, limit)
 }
 
