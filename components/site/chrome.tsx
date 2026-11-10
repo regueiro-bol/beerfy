@@ -237,6 +237,5 @@ export function ScoreBadge({
   );
 }
 
-export function formatScore(n: number) {
-  return n.toFixed(1).replace(".", ",");
-}
+import { formatScore } from "@/lib/format";
+export { formatScore };

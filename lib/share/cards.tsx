@@ -1,3 +1,4 @@
+import { formatScore } from '@/lib/format'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -47,7 +48,7 @@ export async function loadImage(cover: string | null, fallback = '/images/hero.j
   }
 }
 
-export const fmt = (n: number) => n.toFixed(1).replace('.', ',')
+export const fmt = formatScore
 
 export function Mark({ size }: { size: number }) {
   return (
@@ -192,7 +193,6 @@ export function TiradaStory(d: TiradaData) {
           <Mark size={64} />
           <span style={{ fontFamily: 'Bricolage', fontSize: 52 }}>beerfy</span>
         </div>
-        <span style={{ fontSize: 34, color: SAND }}>{d.date}</span>
       </div>
       <div style={{ position: 'absolute', top: 420, left: 70, right: 70, display: 'flex', flexDirection: 'column' }}>
         <span style={{ fontSize: 44, fontWeight: 700, letterSpacing: 6, color: AMBER }}>MI TIRADA EN</span>
@@ -215,7 +215,7 @@ export function TiradaStory(d: TiradaData) {
         {d.comment && (
           <span style={{ marginTop: 20, fontFamily: 'Newsreader', fontStyle: 'italic', fontSize: 54, lineHeight: 1.15 }}>{`«${d.comment.slice(0, 110)}${d.comment.length > 110 ? '…' : ''}»`}</span>
         )}
-        <span style={{ marginTop: 16, fontSize: 36, color: '#A99F8B' }}>¿Y a ti, cómo te la tiran? · beerfy.es</span>
+        <span style={{ marginTop: 16, fontSize: 36, color: '#A99F8B' }}>{`${d.date} · ¿Y a ti, cómo te la tiran? · beerfy.es`}</span>
       </div>
     </div>
   )

@@ -1,5 +1,7 @@
 'use client'
 
+import { formatScore } from '@/lib/format'
+
 import Link from 'next/link'
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { submitRating, type RateState } from './actions'
@@ -68,7 +70,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
   const foamH = 6 + v.score_foam * 3
 
   if (state.ok) {
-    const score = (state.score ?? 0).toFixed(1).replace('.', ',')
+    const score = formatScore(state.score ?? 0)
     const story = state.ratingId ? `/api/card/tirada/${state.ratingId}` : null
     return (
       <div className="flex flex-col gap-6 rounded-[32px] bg-ink p-7 text-cream md:flex-row md:items-center md:gap-10 md:p-12">
@@ -139,7 +141,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
       </div>
 
       <div className="flex items-center gap-5 rounded-[28px] bg-ink p-5 text-cream md:p-6">
-        <svg viewBox="0 0 104 140" width="78" height="105" role="img" aria-label={`Vaso lleno según tu nota: ${score.toFixed(1)}`}>
+        <svg viewBox="0 0 104 140" width="78" height="105" role="img" aria-label={`Vaso lleno según tu nota: ${formatScore(score)}`}>
           <defs>
             <clipPath id="pg"><path d="M14 34 L90 34 L82 132 L22 132 Z" /></clipPath>
             <linearGradient id="pb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#F7C858" /><stop offset="1" stopColor="#C9761A" /></linearGradient>
@@ -153,7 +155,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
         <div>
           <p className="text-sm text-sand">Tu Nota de tirada</p>
           <p className="font-display text-[56px] font-extrabold leading-none text-amber" aria-live="polite">
-            {score ? score.toFixed(1).replace('.', ',') : '–'}
+            {score ? formatScore(score) : '–'}
           </p>
         </div>
       </div>
@@ -211,7 +213,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
         disabled={!done || pending || geo === 'locating'}
         className="h-[58px] rounded-[18px] bg-amber text-[17px] font-extrabold text-ink transition hover:brightness-95 disabled:opacity-50"
       >
-        {geo === 'locating' ? 'Comprobando que estás en el bar…' : pending ? 'Enviando…' : done ? `Enviar mi nota · ${score.toFixed(1).replace('.', ',')}` : 'Puntúa los cuatro criterios'}
+        {geo === 'locating' ? 'Comprobando que estás en el bar…' : pending ? 'Enviando…' : done ? `Enviar mi nota · ${formatScore(score)}` : 'Puntúa los cuatro criterios'}
       </button>
       <p className="text-xs leading-relaxed text-stone">
         Solo se puntúa desde el bar: al enviar te pediremos la ubicación para comprobar que estás allí. No la guardamos. Sin registro, una nota por bar y

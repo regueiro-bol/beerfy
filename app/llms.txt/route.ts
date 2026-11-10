@@ -1,3 +1,4 @@
+import { formatScore } from "@/lib/format";
 import { CHAPTERS, FAQ } from "@/lib/content/bodega";
 import { getPublishedCities, getRankedVenues } from "@/lib/supabase/queries";
 import { SITE_URL } from "@/lib/site";
@@ -39,7 +40,7 @@ export async function GET() {
     for (const v of venues) {
       const nota =
         v.score !== null
-          ? `Nota de tirada ${v.score.toFixed(1)} (${v.votes} votos)`
+          ? `Nota de tirada ${formatScore(v.score)} sobre 10 (${v.votes} votos)`
           : "sin puntuaciones aún";
       lines.push(
         `- [${v.name}](${base}/${v.cities?.slug}/${v.slug}): ${[v.cities?.name, v.district].filter(Boolean).join(", ")}; ${nota}`,
