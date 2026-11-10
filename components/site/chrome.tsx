@@ -124,7 +124,8 @@ export function SiteFooter() {
             mencionan solo para identificar la cerveza servida.
           </p>
           <p>
-            Imágenes de ambiente generadas con IA. © {new Date().getFullYear()}{" "}
+            Algunas imágenes de ambiente están generadas con IA; las fotos de
+            tanques, cañas y locales son reales. © {new Date().getFullYear()}{" "}
             Beerfy
           </p>
         </div>
