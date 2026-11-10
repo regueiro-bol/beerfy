@@ -20,6 +20,9 @@ export type Chapter = {
     | "tanksCopper"
     | "tankEg"
     | "glass1906";
+  /** Alt y pie de la imagen de cabecera (fotos reales). Sin pie → «generada con IA». */
+  imageAlt?: string;
+  imageCaption?: string;
   minutes: number;
   lead: string;
   summary: string[];
