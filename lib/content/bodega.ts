@@ -52,7 +52,7 @@ export const CHAPTERS: Chapter[] = [
         id: "nombres",
         title: "Bodega, tanque, sin pasteurizar",
         body: [
-          "En España la expresión «cerveza de bodega» se asocia sobre todo a Estrella Galicia de Bodega, la referencia más conocida de este formato. En otros países la idea es la misma y se habla de cerveza de tanque: en la República Checa, por ejemplo, el «tankové pivo» es una tradición muy extendida.",
+          "En España, «cerveza de bodega» es como las cerveceras llaman a este servicio. Las dos grandes que lo ofrecen son Hijos de Rivera, con Estrella Galicia de Bodega y 1906 de Bodega, y Mahou San Miguel, que fue pionera con su sistema de tanque para San Miguel en 1997 y hoy lo sirve también con Mahou. En otros países se habla de cerveza de tanque: en la República Checa, por ejemplo, el «tankové pivo» es una tradición muy extendida.",
           "En Beerfy usamos «cerveza de bodega» y «cerveza de tanque» como sinónimos: cerveza sin pasteurizar servida desde tanque.",
         ],
       },
@@ -325,9 +325,95 @@ export const CHAPTERS: Chapter[] = [
       },
     ],
   },
+  {
+    slug: "marcas-cerveza-de-bodega",
+    n: "07",
+    title:
+      "Marcas de cerveza de bodega en España: Estrella Galicia, Mahou y San Miguel",
+    metaTitle:
+      "Marcas de cerveza de bodega: Estrella Galicia, Mahou y San Miguel",
+    metaDescription:
+      "Qué cerveceras sirven cerveza de bodega (sin pasteurizar, de tanque) en España: Estrella Galicia y 1906 de Hijos de Rivera, y Mahou y San Miguel de Mahou San Miguel. Cómo lo hace cada una.",
+    short:
+      "Quién sirve cerveza de tanque en España y en qué se parecen sus sistemas.",
+    category: "Qué es",
+    image: "truck",
+    minutes: 4,
+    lead: "La cerveza de bodega no es una marca: es una forma de servir la cerveza. En España la ofrecen sobre todo dos grandes cerveceras, cada una con sus marcas y su propio sistema de tanques.",
+    summary: [
+      "Hijos de Rivera: Estrella Galicia de Bodega y 1906 de Bodega, desde su fábrica de A Coruña.",
+      "Mahou San Miguel: pionera en España con el tanque de San Miguel en 1997; hoy también con Mahou.",
+      "Todas comparten lo esencial: sin pasteurizar, cadena de frío y tanques fijos en el bar.",
+      "La marca te dice qué cerveza es; la tirada, si te la sirven bien.",
+    ],
+    sections: [
+      {
+        id: "hijos-de-rivera",
+        title: "Estrella Galicia y 1906 (Hijos de Rivera)",
+        body: [
+          "Estrella Galicia de Bodega es la versión sin pasteurizar de Estrella Galicia: una Helles Exportbier de 5,5 % que sale de la fábrica de A Coruña y viaja en frío hasta el bar, donde se descarga en tanques. Hijos de Rivera extendió después el mismo servicio a su marca 1906.",
+          "La compañía ha ido renovando los tanques: en A Coruña inauguró el primer bar con tanques verticales de Cerveza de Bodega, pensados para ocupar menos y verse desde la barra.",
+        ],
+      },
+      {
+        id: "mahou-san-miguel",
+        title: "Mahou y San Miguel (Mahou San Miguel)",
+        body: [
+          "Mahou San Miguel fue pionera en España con el sistema de tanque: lo lanzó con San Miguel en 1997 y, según la propia compañía, sentó las bases del modelo actual de cerveza sin pasteurizar del sector. Hoy lo ofrece también con Mahou y lo llama, igual que el resto, cerveza de bodega.",
+          "En 2026 anunció un nuevo tanque de 500 litros, apilable y con cámara refrigerada interna, conectado a Púlsar, un sistema propio que vigila en tiempo real el volumen, el consumo, la temperatura y la presión. Prevé llevarlo a 700 locales en cinco años.",
+        ],
+      },
+      {
+        id: "en-comun",
+        title: "Lo que tienen en común",
+        body: [
+          "Cambian la marca y el diseño del tanque, pero la idea es la misma: cerveza sin pasteurizar, que no sale de la cadena de frío y que se sirve desde tanques fijos del local, sin barriles.",
+          "Eso también significa que comparten los mismos riesgos: si el bar no cuida el frío, la limpieza de las líneas o la rotación, la ventaja se pierde. Por eso en Beerfy puntuamos la tirada y no la marca.",
+        ],
+      },
+      {
+        id: "como-reconocerla",
+        title: "Cómo saber cuál te están sirviendo",
+        body: [
+          "Mira los tanques y la cartelería: los bares que sirven cerveza de bodega suelen tener los tanques a la vista, con la imagen de la marca, y lo anuncian en la barra o en la fachada. Si tienes dudas, pregunta qué cerveza de tanque tienen.",
+          "En Beerfy empezamos por los bares con Estrella Galicia de Bodega y vamos a ir sumando los de otras marcas. Si conoces un bar con tanque de Mahou o San Miguel, puedes sugerirlo.",
+        ],
+      },
+    ],
+    sources: [
+      {
+        label: "Estrella Galicia — Cerveza de Bodega (ficha de producto)",
+        url: "https://estrellagalicia.es/producto/estrella-galicia-cerveza-de-bodega/",
+      },
+      {
+        label:
+          "Alimarket — Hijos de Rivera extiende el modelo de cerveza de bodega a 1906",
+        url: "https://www.alimarket.es/alimentacion/noticia/305492/hijos-de-rivera-extiende-el-modelo-de-cerveza-de-bodega-a--1906-",
+      },
+      {
+        label:
+          "Hijos de Rivera — Primer bar con tanques verticales de Cerveza de Bodega",
+        url: "https://corporacionhijosderivera.com/en/first-pub-with-estrella-galicia-vertical-tanks-in-spain",
+      },
+      {
+        label:
+          "Alimarket — Mahou San Miguel apuesta por la digitalización de la cerveza de bodega",
+        url: "https://www.alimarket.es/alimentacion/noticia/428823/mahou-san-miguel-apuesta-por-la-digitalizacion-de-la-cerveza-de-bodega",
+      },
+      {
+        label:
+          "Vinetur — Mahou San Miguel llevará control digital en tiempo real a 700 locales de hostelería (7 jul 2026)",
+        url: "https://www.vinetur.com/es/20260707103829/mahou-san-miguel-llevara-control-digital-en-tiempo-real-a-700-locales-de-hosteleria.html",
+      },
+    ],
+  },
 ];
 
 export const FAQ = [
+  {
+    q: "¿Qué marcas sirven cerveza de bodega?",
+    a: "En España, sobre todo Hijos de Rivera (Estrella Galicia de Bodega y 1906 de Bodega) y Mahou San Miguel, que fue pionera con el tanque de San Miguel en 1997 y hoy también lo ofrece con Mahou.",
+  },
   {
     q: "¿En qué se diferencia la cerveza de bodega de la de barril?",
     a: "La de barril normalmente está pasteurizada y llega en barriles que se conectan al grifo. La de bodega no se pasteuriza, viaja refrigerada en cisterna y se guarda en tanques fijos del bar.",
