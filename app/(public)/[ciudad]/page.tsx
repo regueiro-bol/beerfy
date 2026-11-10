@@ -1,73 +1,128 @@
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { getCovers } from '@/lib/google/place-live'
-import Image from 'next/image'
-import { getCityBySlug, getPublishedVenuesForCity, getVenueScores } from '@/lib/supabase/queries'
-import { getCityPlaceSchema, getBreadcrumbSchema } from '@/lib/seo/schema'
-import { SiteHeader } from '@/components/site/chrome'
-import { VenueCard } from '@/components/site/venue-card'
-import { BAR_AMBIENCE } from '@/lib/content/images'
-import CityMap from '@/components/feature/city-map/CityMap'
-import { SITE_URL } from '@/lib/site'
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { getCovers } from "@/lib/google/place-live";
+import Image from "next/image";
+import {
+  getCityBySlug,
+  getPublishedVenuesForCity,
+  getVenueScores,
+} from "@/lib/supabase/queries";
+import {
+  getCityPlaceSchema,
+  getBreadcrumbSchema,
+  getVenueListSchema,
+  jsonLd,
+} from "@/lib/seo/schema";
+import { SiteHeader } from "@/components/site/chrome";
+import { VenueCard } from "@/components/site/venue-card";
+import { BAR_AMBIENCE } from "@/lib/content/images";
+import CityMap from "@/components/feature/city-map/CityMap";
+import { SITE_URL } from "@/lib/site";
 
-const APP_URL = SITE_URL
+const APP_URL = SITE_URL;
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: Promise<{ ciudad: string }>
+  params: Promise<{ ciudad: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { ciudad } = await params
-  const city = await getCityBySlug(ciudad)
-  if (!city) return {}
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { ciudad } = await params;
+  const city = await getCityBySlug(ciudad);
+  if (!city) return {};
 
   const plainDescription = city.intro_html
-    ? city.intro_html.replace(/<[^>]*>/g, '').substring(0, 155)
-    : `Bares con cerveza de bodega en ${city.name}: dónde te tiran bien la Estrella Galicia de Bodega y otras cervezas de tanque.`
+    ? city.intro_html.replace(/<[^>]*>/g, "").substring(0, 155)
+    : `Bares con cerveza de bodega en ${city.name}: dónde te tiran bien la Estrella Galicia de Bodega y otras cervezas de tanque.`;
 
   return {
-    title: `Cerveza de bodega en ${city.name}`,
+    title: `Cerveza de bodega en ${city.name}: dónde tomar la mejor caña`,
     description: plainDescription,
     alternates: { canonical: `${APP_URL}/${city.slug}` },
-  }
+  };
 }
 
 export default async function CityDetailPage({ params }: PageProps) {
-  const { ciudad } = await params
-  const city = await getCityBySlug(ciudad)
-  if (!city) notFound()
+  const { ciudad } = await params;
+  const city = await getCityBySlug(ciudad);
+  if (!city) notFound();
 
-  const venues = await getPublishedVenuesForCity(city.id)
-  const scores = await getVenueScores(venues.map((v) => v.id))
-  const sorted = [...venues].sort((a, b) => (scores[b.id]?.score ?? -1) - (scores[a.id]?.score ?? -1))
+  const venues = await getPublishedVenuesForCity(city.id);
+  const scores = await getVenueScores(venues.map((v) => v.id));
+  const sorted = [...venues].sort(
+    (a, b) => (scores[b.id]?.score ?? -1) - (scores[a.id]?.score ?? -1),
+  );
   // Portadas de Google solo para las 12 primeras tarjetas (cada una son 2 llamadas facturables).
-  const covers = await getCovers(sorted.slice(0, 12))
-  const schema = getCityPlaceSchema(city)
+  const covers = await getCovers(sorted.slice(0, 12));
+  const schema = getCityPlaceSchema(city);
+  const hasScores = sorted.some((v) => (scores[v.id]?.score ?? null) !== null);
   const mapCenter = {
     lat: city.latitude ? Number(city.latitude) : 42.3358,
     lng: city.longitude ? Number(city.longitude) : -7.8639,
-  }
+  };
 
   return (
     <main>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLd(schema)}
+      />
+      {sorted.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={jsonLd(
+            getVenueListSchema(
+              `Bares con cerveza de bodega en ${city.name}`,
+              sorted.map((v) => ({
+                name: v.name,
+                path: `/${city.slug}/${v.slug}`,
+              })),
+            ),
+          )}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(getBreadcrumbSchema([{ name: 'Ciudades', path: '/ciudades' }, { name: city.name, path: `/${city.slug}` }])),
+          __html: JSON.stringify(
+            getBreadcrumbSchema([
+              { name: "Ciudades", path: "/ciudades" },
+              { name: city.name, path: `/${city.slug}` },
+            ]),
+          ),
         }}
       />
 
       <section className="relative overflow-hidden bg-ink text-cream">
-        <Image src={BAR_AMBIENCE[2]} alt="" fill preload sizes="100vw" className="object-cover opacity-45" placeholder="blur" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/70" aria-hidden="true" />
+        <Image
+          src={BAR_AMBIENCE[2]}
+          alt=""
+          fill
+          preload
+          sizes="100vw"
+          className="object-cover opacity-45"
+          placeholder="blur"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/70"
+          aria-hidden="true"
+        />
         <SiteHeader variant="overlay" />
         <div className="relative mx-auto max-w-[1320px] px-5 pb-16 pt-14 md:px-8 md:pt-24">
-          <nav aria-label="Migas de pan" className="mb-6 flex gap-2 text-sm text-sand">
-            <Link href="/ciudades" className="underline-offset-4 hover:underline">Ciudades</Link>
+          <nav
+            aria-label="Migas de pan"
+            className="mb-6 flex gap-2 text-sm text-sand"
+          >
+            <Link
+              href="/ciudades"
+              className="underline-offset-4 hover:underline"
+            >
+              Ciudades
+            </Link>
             <span aria-hidden="true">/</span>
             <span className="text-cream">{city.name}</span>
           </nav>
@@ -90,11 +145,24 @@ export default async function CityDetailPage({ params }: PageProps) {
         {sorted.length > 0 ? (
           <>
             <div className="overflow-hidden rounded-[28px]">
-              <CityMap venues={sorted} center={mapCenter} citySlug={city.slug} />
+              <CityMap
+                venues={sorted}
+                center={mapCenter}
+                citySlug={city.slug}
+              />
             </div>
-            <h2 className="font-display text-[40px] font-extrabold tracking-[-0.03em] md:text-[56px]">
-              {sorted.length === 1 ? '1 bar' : `${sorted.length} bares`} en {city.name}
-            </h2>
+            <div className="flex flex-col gap-3">
+              <h2 className="font-display text-[40px] font-extrabold tracking-[-0.03em] md:text-[56px]">
+                Las mejores cañas de {city.name}
+              </h2>
+              <p className="max-w-[680px] text-lg text-stone">
+                {sorted.length === 1 ? "1 bar" : `${sorted.length} bares`} con
+                cerveza de bodega en {city.name}
+                {hasScores
+                  ? ", ordenados por Nota de tirada: la media de lo que puntúa quien se la bebe."
+                  : ". Los ordenaremos por Nota de tirada en cuanto acumulen puntuaciones de quien se la bebe."}
+              </p>
+            </div>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
               {sorted.map((v) => (
                 <VenueCard
@@ -114,16 +182,22 @@ export default async function CityDetailPage({ params }: PageProps) {
           </>
         ) : (
           <div className="flex flex-col items-start gap-5 rounded-[32px] bg-[#F3EEE2] p-8 md:p-14">
-            <p className="font-display text-[34px] font-extrabold leading-tight md:text-[48px]">Estamos catando {city.name}.</p>
-            <p className="max-w-[560px] text-lg text-stone">
-              Aún no hemos publicado bares aquí. Revisamos cada local antes de añadirlo. ¿Conoces uno donde la tiren de diez?
+            <p className="font-display text-[34px] font-extrabold leading-tight md:text-[48px]">
+              Estamos catando {city.name}.
             </p>
-            <Link href={`/sugerir?ciudad=${city.slug}`} className="rounded-full bg-ink px-6 py-4 font-bold text-cream">
+            <p className="max-w-[560px] text-lg text-stone">
+              Aún no hemos publicado bares aquí. Revisamos cada local antes de
+              añadirlo. ¿Conoces uno donde la tiren de diez?
+            </p>
+            <Link
+              href={`/sugerir?ciudad=${city.slug}`}
+              className="rounded-full bg-ink px-6 py-4 font-bold text-cream"
+            >
               Sugerir un bar en {city.name}
             </Link>
           </div>
         )}
       </section>
     </main>
-  )
+  );
 }
