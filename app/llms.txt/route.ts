@@ -17,7 +17,7 @@ export async function GET() {
     "",
     "> Guía colaborativa e independiente de bares que sirven cerveza de bodega (cerveza sin pasteurizar servida directamente desde tanque), empezando por Estrella Galicia de Bodega. La comunidad puntúa la tirada (temperatura, espuma, vaso y frescura) y la media es la «Nota de tirada» de 0 a 10.",
     "",
-    "Beerfy no tiene afiliación con ninguna cervecera. Cada bar se revisa antes de publicarse. Los horarios y puntuaciones de Google que aparecen en las fichas proceden de Google Maps y no son valoraciones de Beerfy.",
+    "En España sirven cerveza de bodega sobre todo Hijos de Rivera (Estrella Galicia de Bodega, 1906 de Bodega) y Mahou San Miguel (pionera con San Miguel en 1997; hoy también Mahou). Beerfy no tiene afiliación con ninguna cervecera. Cada bar se revisa antes de publicarse. Los horarios y puntuaciones de Google que aparecen en las fichas proceden de Google Maps y no son valoraciones de Beerfy.",
     "",
     "## Estrella Galicia de Bodega",
     `- [Estrella Galicia de Bodega: qué es y dónde tomarla](${base}/estrella-galicia-de-bodega): versión sin pasteurizar de Estrella Galicia (Helles Exportbier, 5,5 %), servida desde tanque; listado de bares por ciudad`,
