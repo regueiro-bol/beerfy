@@ -12,6 +12,8 @@ import tanksCopper from "@/public/images/tanks-copper.jpg";
 import glass1906 from "@/public/images/glass-1906.jpg";
 import glass1906b from "@/public/images/glass-1906-b.jpg";
 import glass1906top from "@/public/images/glass-1906-top.jpg";
+import tapsVivian from "@/public/images/taps-vivian.jpg";
+import tapsVivianB from "@/public/images/taps-vivian-b.jpg";
 
 /** Imágenes de ambiente (IA, genéricas) + fotos reales propias (tankEg, tanksCopper, glass1906*). */
 export const IMG = {
@@ -28,5 +30,7 @@ export const IMG = {
   glass1906,
   glass1906b,
   glass1906top,
+  tapsVivian,
+  tapsVivianB,
 };
 export const BAR_AMBIENCE = [bar1, bar2, bar3] as const;
