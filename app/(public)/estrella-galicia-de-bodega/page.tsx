@@ -237,10 +237,10 @@ export default async function EstrellaGaliciaBodegaPage() {
             más suave que la de barril, donde el CO₂ presiona directamente sobre la cerveza.
           </p>
           <p>
-            Esos tanques son la pista para reconocerla: suelen estar a la vista,
-            en la barra o en una sala del local, con la imagen de Cerveza de
-            Bodega. Hijos de Rivera, la empresa que la elabora, también la
-            ofrece con su marca 1906.
+            Los tanques y los grifos son la pista para reconocerla: los tanques
+            suelen estar a la vista, en la barra o en una sala del local, y el
+            grifo lleva el rótulo «Cerveza de Bodega». Hijos de Rivera, la
+            empresa que la elabora, también la ofrece con su marca 1906.
           </p>
           <p>
             Que un bar tenga tanque no garantiza una buena caña. La copa, la
@@ -255,18 +255,30 @@ export default async function EstrellaGaliciaBodegaPage() {
             .
           </p>
           <figure className="mt-2 flex flex-col gap-2">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl md:aspect-[4/3]">
-              <Image
-                src={IMG.tanksCopper}
-                alt="Dos tanques de cobre de Estrella Galicia Cerveza de Bodega apilados en el bar Vivian, en Ourense"
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover object-top"
-                placeholder="blur"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
+                <Image
+                  src={IMG.tanksCopper}
+                  alt="Dos tanques de cobre de Estrella Galicia Cerveza de Bodega apilados en el bar Vivian, en Ourense"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover object-top"
+                  placeholder="blur"
+                />
+              </div>
+              <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
+                <Image
+                  src={IMG.tapsVivian}
+                  alt="Grifos de Cerveza de Bodega Estrella Galicia y de 1906 La Milnueve en la barra de Vivian, en Ourense"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover object-top"
+                  placeholder="blur"
+                />
+              </div>
             </div>
             <figcaption className="font-sans text-sm text-stone">
-              Tanques de Cerveza de Bodega en Vivian (Ourense). Foto: Beerfy.
+              Tanques y grifos de Cerveza de Bodega en Vivian (Ourense). Foto: Beerfy.
             </figcaption>
           </figure>
         </div>

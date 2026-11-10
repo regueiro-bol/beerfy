@@ -323,7 +323,7 @@ export const CHAPTERS: Chapter[] = [
         id: "como-reconocerla",
         title: "Cómo saber si te la sirven de bodega",
         body: [
-          "La pista más clara son los tanques: suelen estar a la vista, en la barra o en una sala del local, con la imagen de la cerveza de bodega. Algunos bares tienen ya tanques verticales, que ocupan menos y se ven desde la barra.",
+          "La pista más clara son los tanques: suelen estar a la vista, en la barra o en una sala del local, con la imagen de la cerveza de bodega. La otra está en la barra: el grifo suele llevar el rótulo «Cerveza de Bodega» de la marca. Algunos bares tienen ya tanques verticales, que ocupan menos y se ven desde la barra.",
           "Si no los ves, pregunta: en un bar que la tiene, te lo dirán con gusto. Y si quieres ir sobre seguro, en Beerfy solo publicamos bares revisados que la sirven.",
         ],
       },
