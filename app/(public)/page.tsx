@@ -419,9 +419,20 @@ export default async function HomePage() {
 
       {/* CIUDADES */}
       <section className="mx-auto flex max-w-[1320px] flex-col gap-7 px-5 pb-12 md:px-8">
-        <h2 className="font-display text-[44px] font-extrabold tracking-[-0.04em] md:text-[64px]">
-          Explora por ciudad
-        </h2>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h2 className="font-display text-[44px] font-extrabold tracking-[-0.04em] md:text-[64px]">
+            Explora por ciudad
+          </h2>
+          <Link
+            href="/estrella-galicia-de-bodega"
+            className="font-semibold text-bottle underline underline-offset-4"
+            data-track="cta_click"
+            data-track-location="home_ciudades"
+            data-track-label="estrella_galicia_de_bodega"
+          >
+            Todos los bares con Estrella Galicia de Bodega →
+          </Link>
+        </div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
           {cities.map((city, i) => {
             const n = counts[city.id] || 0;
