@@ -90,3 +90,20 @@ export const IconCheck = (p: P) => (
     <Path d="M5 12l5 5 9-10" />
   </S>
 )
+export const IconPhone = (p: P) => (
+  <S {...p}>
+    <Path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+  </S>
+)
+export const IconGlobe = (p: P) => (
+  <S {...p}>
+    <Circle cx={12} cy={12} r={9} />
+    <Path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+  </S>
+)
+export const IconClock = (p: P) => (
+  <S {...p}>
+    <Circle cx={12} cy={12} r={9} />
+    <Path d="M12 7v5l3 2" />
+  </S>
+)

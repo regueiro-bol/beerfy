@@ -1,4 +1,5 @@
 import { BricolageGrotesque_700Bold, BricolageGrotesque_800ExtraBold } from '@expo-google-fonts/bricolage-grotesque'
+import { Newsreader_400Regular } from '@expo-google-fonts/newsreader'
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
@@ -20,6 +21,7 @@ function Root() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Newsreader_400Regular,
   })
   const ready = fontsLoaded && ageOk !== null
 
