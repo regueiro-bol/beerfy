@@ -23,4 +23,5 @@ export const F = {
   medium: 'Inter_500Medium',
   semibold: 'Inter_600SemiBold',
   bold: 'Inter_700Bold',
+  serif: 'Newsreader_400Regular',
 } as const

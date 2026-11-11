@@ -28,18 +28,37 @@ export type AppData = { site: string; cities: City[]; venues: Venue[]; bodega: C
 
 export type VenueDetail = {
   description: string | null
+  descriptionReviewed: boolean
+  address: string | null
   phone: string | null
   website: string | null
-  highlights: string[] | null
-  beers: { name: string; brewery: string; status: 'confirmada' | 'por_confirmar' }[]
+  mapsUri: string | null
+  beers: Array<{
+    name: string
+    brewery: string
+    style: string | null
+    unpasteurized: boolean
+    status: 'confirmada' | 'por_confirmar'
+    source: 'equipo' | 'bar' | 'comunidad' | null
+    lastConfirmedAt: string | null
+  }>
   criteria: {
     temperature: number | null
     foam: number | null
     glass: number | null
     freshness: number | null
     votes: number
-    comments: { comment: string; score: number; created_at: string }[]
+    comments: Array<{ comment: string; score: number; created_at: string }>
   }
+  /** Datos de Google Maps (horario, nota, características). Pueden faltar. */
+  google: {
+    openNow: boolean | null
+    weekdays: string[]
+    rating: number | null
+    ratingCount: number | null
+    businessStatus: string | null
+    features: string[]
+  } | null
 }
 
 const CACHE_KEY = 'bfy-data-v1'
