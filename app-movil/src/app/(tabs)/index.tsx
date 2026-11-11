@@ -4,7 +4,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, Text, View } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BrandTile } from '@/components/brand'
 import { IconBell, IconNavigate, IconPin, IconPlusCircle } from '@/components/icons'
-import { Body, Button, H1, H2, Kicker, Loading, VenueRow, s } from '@/components/ui'
+import { Body, Button, H1, H2, HoursText, Kicker, Loading, VenueRow, s } from '@/components/ui'
 import { formatDistance, formatScore, scoreLabel } from '@/lib/format'
 import { useNearby, useStore } from '@/lib/store'
 import { openDirections } from '@/lib/links'
@@ -12,8 +12,13 @@ import { C, F } from '@/lib/theme'
 
 export default function Home() {
   const { data, loading, error, refresh, me, locState, locate } = useStore()
-  const nearby = useNearby(6)
-  const top = nearby[0]
+  const all = useNearby()
+  // Con horario conocido, primero los abiertos: «Abiertos ahora cerca de ti».
+  const known = all.some((v) => v.status)
+  const openNow = all.filter((v) => v.status?.open)
+  const top = (me ? openNow[0] : undefined) ?? all[0]
+  const rest = (me && openNow.length ? openNow : all).filter((v) => v.id !== top?.id).slice(0, 5)
+  const listTitle = me ? (openNow.length ? 'Abiertos ahora cerca de ti' : 'Cerca de ti') : 'Los mejor puntuados'
 
   if (loading && !data) return <Loading />
 
@@ -70,7 +75,8 @@ export default function Home() {
               {top.cover ? <Image source={{ uri: top.cover }} style={{ height: 150 }} contentFit="cover" transition={150} /> : null}
               <View style={{ padding: 18, gap: 8 }}>
                 <Text style={{ fontFamily: F.bold, fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', color: C.amber }}>
-                  La más cercana{top.d !== null ? ` · ${formatDistance(top.d)}` : ''}
+                  {top.status?.open ? 'La más cercana abierta' : 'La más cercana'}
+                  {top.d !== null ? ` · ${formatDistance(top.d)}` : ''}
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <Text style={{ flex: 1, fontFamily: F.display, fontSize: 26, color: C.cream }} numberOfLines={2}>
@@ -85,6 +91,7 @@ export default function Home() {
                 <Text style={{ fontFamily: F.body, fontSize: 14, color: C.sand }}>
                   {top.beers.join(' · ')} · {scoreLabel(top.score, top.votes)}
                 </Text>
+                <HoursText status={top.status} size={14} dark />
                 <Button
                   label="Llévame"
                   variant="amber"
@@ -97,15 +104,18 @@ export default function Home() {
         ) : null}
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <H2>{me ? 'Cerca de ti' : 'Los mejor puntuados'}</H2>
+          <H2 style={{ flex: 1 }}>{listTitle}</H2>
           <Pressable accessibilityRole="link" onPress={() => router.push('/cerca')} style={{ minHeight: 44, justifyContent: 'center' }}>
             <Text style={{ fontFamily: F.semibold, fontSize: 14, color: C.bottle }}>Ver mapa</Text>
           </Pressable>
         </View>
         <View style={{ gap: 10 }}>
-          {(me ? nearby.slice(1) : nearby).map((v) => (
+          {rest.map((v) => (
             <VenueRow key={v.id} v={v} />
           ))}
+          {me && known && openNow.length === 0 ? (
+            <Body style={{ fontSize: 14 }}>Ahora mismo no hay bares de la guía abiertos cerca. Te dejamos los más próximos con su hora de apertura.</Body>
+          ) : null}
         </View>
 
         <Pressable

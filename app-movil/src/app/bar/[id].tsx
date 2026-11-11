@@ -6,10 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BrandMark } from '@/components/brand'
 import { IconBack, IconBookmark, IconClock, IconGlobe, IconPhone, IconPin, IconPlus, IconShare } from '@/components/icons'
 import { MiniMap } from '@/components/mini-map'
-import { Button, Loading, ScoreBadge } from '@/components/ui'
+import { Button, HoursText, Loading, ScoreBadge } from '@/components/ui'
 import { fetchVenue, type VenueDetail } from '@/lib/api'
 import { distanceM, formatDistance, formatScore, MIN_VOTES, timeAgo } from '@/lib/format'
-import { useStore, useVenue } from '@/lib/store'
+import { hoursStatus } from '@/lib/hours'
+import { useNow, useStore, useVenue } from '@/lib/store'
 import { C, F } from '@/lib/theme'
 
 /** Mismos criterios y nombres que la ficha de la web. */
@@ -31,6 +32,7 @@ export default function Ficha() {
   const insets = useSafeAreaInsets()
   const [detail, setDetail] = useState<VenueDetail | null>(null)
   const [failed, setFailed] = useState(false)
+  const now = useNow()
 
   useEffect(() => {
     if (!id) return
@@ -41,6 +43,7 @@ export default function Ficha() {
 
   if (!v) return <Loading />
   const isSaved = saved.includes(v.id)
+  const status = hoursStatus(v.hours, now)
   const d = me && v.lat !== null && v.lng !== null ? distanceM(me, { lat: v.lat, lng: v.lng }) : null
   const crit = detail?.criteria
   const g = detail?.google ?? null
@@ -95,7 +98,9 @@ export default function Ficha() {
                 {[v.city?.name, d !== null ? formatDistance(d) : null].filter(Boolean).join(' · ')}
               </Text>
               <Text style={{ fontFamily: F.display, fontSize: 34, lineHeight: 36, letterSpacing: -0.8, color: C.ink }}>{v.name}</Text>
-              {g?.openNow != null ? (
+              {status ? (
+                <HoursText status={status} size={14} />
+              ) : g?.openNow != null ? (
                 <Text style={{ fontFamily: F.semibold, fontSize: 14, color: g.openNow ? C.open : C.stone }}>{g.openNow ? 'Abierto ahora' : 'Cerrado ahora'}</Text>
               ) : null}
             </View>

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Crypto from 'expo-crypto'
+import type { OpeningPeriod } from './hours'
 
 /** La app habla con la misma web (www.beerfy.es): mismos bares, mismas notas, mismas reglas. */
 export const SITE = 'https://www.beerfy.es'
@@ -22,6 +23,8 @@ export type Venue = {
   votes: number
   beers: string[]
   publishedAt: string | null
+  /** Horario semanal (Google), para calcular «Abierto ahora» en el móvil. */
+  hours: OpeningPeriod[] | null
 }
 export type Chapter = { slug: string; n: string; title: string; short: string; minutes: number; image: string | null; url: string }
 export type AppData = { site: string; cities: City[]; venues: Venue[]; bodega: Chapter[]; egPage: string }

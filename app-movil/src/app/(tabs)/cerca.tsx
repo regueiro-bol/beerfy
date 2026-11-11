@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IconLocate, IconNavigate } from '@/components/icons'
-import { Button, Loading, ScoreBadge } from '@/components/ui'
+import { Button, HoursText, Loading, ScoreBadge } from '@/components/ui'
 import { VenueMap, type VenueMapHandle } from '@/components/venue-map'
 import { formatDistance, scoreLabel } from '@/lib/format'
 import { openDirections } from '@/lib/links'
@@ -17,6 +17,7 @@ export default function Cerca() {
   const { data, me, locate } = useStore()
   const all = useNearby()
   const [onlyScored, setOnlyScored] = useState(false)
+  const [onlyOpen, setOnlyOpen] = useState(false)
   const [city, setCity] = useState<string | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const map = useRef<VenueMapHandle>(null)
@@ -26,8 +27,8 @@ export default function Cerca() {
   }, [locate])
 
   const venues = useMemo(
-    () => all.filter((v) => (!onlyScored || v.score !== null) && (!city || v.city?.slug === city)),
-    [all, onlyScored, city]
+    () => all.filter((v) => (!onlyOpen || v.status?.open) && (!onlyScored || v.score !== null) && (!city || v.city?.slug === city)),
+    [all, onlyOpen, onlyScored, city]
   )
   const current = venues.find((v) => v.id === selected) ?? venues[0] ?? null
   const cityObj = data?.cities.find((c) => c.slug === city)
@@ -58,6 +59,7 @@ export default function Cerca() {
         style={{ position: 'absolute', top: insets.top + 10, left: 0, right: 0, flexGrow: 0 }}
         contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
       >
+        {chip('Abierto ahora', onlyOpen, () => setOnlyOpen((x) => !x))}
         {chip('Con nota', onlyScored, () => setOnlyScored((x) => !x))}
         {chip('Todas', city === null, () => setCity(null))}
         {data.cities.map((c) => chip(c.name, city === c.slug, () => setCity(c.slug)))}
@@ -92,6 +94,13 @@ export default function Cerca() {
         <IconLocate color={C.me} size={22} width={2.2} />
       </Pressable>
 
+      {!current && onlyOpen ? (
+        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16, backgroundColor: C.paper, borderRadius: 22, padding: 18, gap: 10 }}>
+          <Text style={{ fontFamily: F.bold, fontSize: 15, color: C.ink }}>No hay bares de la guía abiertos ahora{city && cityObj ? ` en ${cityObj.name}` : ''}.</Text>
+          <Button label="Ver todos" variant="outline" style={{ height: 46 }} onPress={() => setOnlyOpen(false)} />
+        </View>
+      ) : null}
+
       {current ? (
         <View
           style={{
@@ -123,6 +132,7 @@ export default function Cerca() {
               <Text style={{ fontFamily: F.body, fontSize: 13, color: C.stone }} numberOfLines={1}>
                 {current.beers.join(' · ')} · {scoreLabel(current.score, current.votes)}
               </Text>
+              <HoursText status={current.status} />
             </View>
             <ScoreBadge score={current.score} votes={current.votes} />
           </View>
