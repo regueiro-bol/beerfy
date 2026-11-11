@@ -73,6 +73,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "owner": "regues-team",
+    "extra": {
+      "eas": {
+        "projectId": "f3db1a35-0712-4824-bff8-fcddefe317de"
+      }
     }
   }
 }
