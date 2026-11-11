@@ -1,0 +1,78 @@
+{
+  "expo": {
+    "name": "Beerfy",
+    "slug": "beerfy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "beerfy",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FBFAF7",
+    "ios": {
+      "bundleIdentifier": "es.beerfy.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Beerfy usa tu ubicación para mostrarte los bares con cerveza de bodega más cercanos y comprobar que estás en el bar al puntuar. No se guarda."
+      }
+    },
+    "android": {
+      "package": "es.beerfy.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0B08",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
+      "predictiveBackGestureEnabled": false,
+      "config": {
+        "googleMaps": {
+          "apiKey": "PENDIENTE_CLAVE_ANDROID"
+        }
+      }
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0D0B08",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 140
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Beerfy usa tu ubicación para mostrarte los bares con cerveza de bodega más cercanos y comprobar que estás en el bar al puntuar. No se guarda."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#F2B33D"
+        }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
