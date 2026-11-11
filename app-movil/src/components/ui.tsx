@@ -3,6 +3,7 @@ import { router } from 'expo-router'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type TextProps, type ViewStyle } from 'react-native'
 import { C, F } from '@/lib/theme'
 import { formatDistance, formatScore, MIN_VOTES, scoreLabel } from '@/lib/format'
+import type { HoursStatus } from '@/lib/hours'
 import type { NearVenue } from '@/lib/store'
 import { BrandMark } from './brand'
 import { IconChevron } from './icons'
@@ -75,6 +76,17 @@ export function Button({
   )
 }
 
+/** Estado del horario con su color: verde abierto, cobre si cierra pronto, gris cerrado. */
+export function HoursText({ status, size = 13, dark }: { status: HoursStatus | null; size?: number; dark?: boolean }) {
+  if (!status) return null
+  const color = status.soon ? (dark ? C.amber : '#A4561B') : status.open ? (dark ? '#8FD9AE' : C.open) : dark ? C.sand : C.stone
+  return (
+    <Text style={{ fontFamily: F.semibold, fontSize: size, color }} numberOfLines={1}>
+      {status.label}
+    </Text>
+  )
+}
+
 /** Fila de bar: foto (o icono), nombre, distancia/ciudad y nota. */
 export function VenueRow({ v }: { v: NearVenue }) {
   const sub = [v.d !== null ? formatDistance(v.d) : v.city?.name, scoreLabel(v.score, v.votes)].filter(Boolean).join(' · ')
@@ -99,6 +111,7 @@ export function VenueRow({ v }: { v: NearVenue }) {
           <Text style={s.rowSub} numberOfLines={1}>
             {sub}
           </Text>
+          <HoursText status={v.status} size={12} />
         </View>
         <ScoreBadge score={v.score} votes={v.votes} />
     </Pressable>

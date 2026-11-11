@@ -3,6 +3,7 @@ import * as Location from 'expo-location'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { fetchData, loadCachedData, type AppData, type Venue } from './api'
 import { distanceM } from './format'
+import { hoursStatus, madridMinuteOfWeek, type HoursStatus } from './hours'
 
 type Coords = { lat: number; lng: number; acc?: number }
 export type LocState = 'unknown' | 'granted' | 'denied' | 'prompt'
@@ -107,15 +108,27 @@ export function useStore() {
   return ctx
 }
 
-export type NearVenue = Venue & { d: number | null }
+/** Minuto de la semana en hora de España; se actualiza cada minuto. */
+export function useNow() {
+  const [now, setNow] = useState(() => madridMinuteOfWeek())
+  useEffect(() => {
+    const t = setInterval(() => setNow(madridMinuteOfWeek()), 60_000)
+    return () => clearInterval(t)
+  }, [])
+  return now
+}
+
+export type NearVenue = Venue & { d: number | null; status: HoursStatus | null }
 
 /** Bares ordenados por cercanía (si hay ubicación) o por nota. */
 export function useNearby(limit?: number): NearVenue[] {
   const { data, me } = useStore()
+  const now = useNow()
   return useMemo(() => {
     const list = (data?.venues ?? []).map((v) => ({
       ...v,
       d: me && v.lat !== null && v.lng !== null ? distanceM(me, { lat: v.lat, lng: v.lng }) : null,
+      status: hoursStatus(v.hours, now),
     }))
     list.sort((a, b) => {
       if (a.d !== null && b.d !== null) return a.d - b.d
@@ -123,7 +136,7 @@ export function useNearby(limit?: number): NearVenue[] {
       return a.score !== null ? -1 : b.score !== null ? 1 : 0
     })
     return limit ? list.slice(0, limit) : list
-  }, [data, me, limit])
+  }, [data, me, limit, now])
 }
 
 export function useVenue(id: string | undefined) {
