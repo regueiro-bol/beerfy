@@ -1,3 +1,4 @@
+import type { BottomTabBarProps } from 'expo-router/js-tabs'
 import { Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { C, F } from '@/lib/theme'
@@ -12,12 +13,7 @@ const TABS: Record<string, { label: string; Icon: typeof IconHome; center?: bool
   sugerir: { label: 'Sugerir', Icon: IconPlusCircle },
 }
 
-type Props = {
-  state: { index: number; routes: { key: string; name: string }[] }
-  navigation: { navigate: (name: string) => void; emit: (e: { type: 'tabPress'; target: string; canPreventDefault: true }) => { defaultPrevented: boolean } }
-}
-
-export function TabBar({ state, navigation }: Props) {
+export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
   const insets = useSafeAreaInsets()
   return (
     <View
@@ -36,8 +32,8 @@ export function TabBar({ state, navigation }: Props) {
         if (!t) return null
         const active = state.index === i
         const onPress = () => {
-          const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true })
-          if (!active && !e.defaultPrevented) navigation.navigate(route.name)
+          const e = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true })
+          if (!active && !e.defaultPrevented) navigateToTab(route.key)
         }
         if (t.center) {
           return (
