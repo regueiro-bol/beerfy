@@ -217,3 +217,33 @@ export async function getCovers(
   )
   return out
 }
+
+export type OpeningPoint = { day: number; hour: number; minute: number }
+export type OpeningPeriod = { open: OpeningPoint; close?: OpeningPoint }
+
+/**
+ * Horario semanal de un sitio (Google regularOpeningHours.periods). `day`: 0 = domingo.
+ * Un único periodo sin `close` significa abierto 24 h. Devuelve null si Google no lo da.
+ */
+export async function getPlaceHours(placeId: string): Promise<{ periods: OpeningPeriod[] | null; businessStatus: string | null } | null> {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY
+  if (!placeId || !apiKey) return null
+  try {
+    const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+      headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': 'regularOpeningHours.periods,businessStatus' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) return null
+    const p = (await res.json()) as { regularOpeningHours?: { periods?: OpeningPeriod[] }; businessStatus?: string }
+    const periods = (p.regularOpeningHours?.periods ?? [])
+      .filter((x) => x.open && Number.isInteger(x.open.day))
+      .map((x) => ({
+        open: { day: x.open.day, hour: x.open.hour ?? 0, minute: x.open.minute ?? 0 },
+        ...(x.close ? { close: { day: x.close.day, hour: x.close.hour ?? 0, minute: x.close.minute ?? 0 } } : {}),
+      }))
+    return { periods: periods.length ? periods : null, businessStatus: p.businessStatus ?? null }
+  } catch {
+    return null
+  }
+}

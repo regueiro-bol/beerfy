@@ -17,7 +17,7 @@ export async function GET() {
     supabase.from('cities').select('id, slug, name, region, latitude, longitude').eq('is_published', true).order('name'),
     supabase
       .from('venues')
-      .select('id, slug, name, address, district, latitude, longitude, cover_image_url, google_place_id, published_at, cities(slug, name)')
+      .select('id, slug, name, address, district, latitude, longitude, cover_image_url, google_place_id, published_at, opening_periods, cities(slug, name)')
       .eq('status', 'published')
       .order('published_at', { ascending: false }),
     supabase.from('venue_beers').select('venue_id, status, beers(name)').neq('status', 'retirada'),
@@ -34,6 +34,7 @@ export async function GET() {
     cover_image_url: string | null
     google_place_id: string | null
     published_at: string | null
+    opening_periods: unknown
     cities: { slug: string; name: string } | null
   }
   const list = (venues || []) as unknown as V[]
@@ -64,6 +65,7 @@ export async function GET() {
         votes: scores[v.id]?.votes ?? 0,
         beers: beers[v.id] ?? ['Estrella Galicia de Bodega'],
         publishedAt: v.published_at,
+        hours: v.opening_periods ?? null,
       })),
       bodega: CHAPTERS.map((c) => ({
         slug: c.slug,
