@@ -15,10 +15,6 @@
     }
   },
   "submit": {
-    "production": {
-      "ios": {
-        "ascAppId": "PENDIENTE_TRAS_CREAR_LA_APP"
-      }
-    }
+    "production": {}
   }
 }
