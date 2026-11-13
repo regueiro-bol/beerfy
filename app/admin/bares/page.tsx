@@ -89,7 +89,10 @@ export default async function BaresAdminPage({ searchParams }: { searchParams: P
             <li key={r.id} className="flex flex-wrap items-center gap-3 p-4">
               <div className="min-w-0 flex-1">
                 <p className="font-bold">
-                  {r.name} <span className={`ml-1 rounded px-2 py-0.5 text-xs font-semibold ${BADGE[r.status]}`}>{LABEL[r.status]}</span>
+                  <Link href={`/admin/bares/${r.id}`} className="underline-offset-4 hover:underline">
+                    {r.name}
+                  </Link>{' '}
+                  <span className={`ml-1 rounded px-2 py-0.5 text-xs font-semibold ${BADGE[r.status]}`}>{LABEL[r.status]}</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {r.cities?.name ?? 'Sin ciudad'}
@@ -111,6 +114,9 @@ export default async function BaresAdminPage({ searchParams }: { searchParams: P
                   </p>
                 ) : null}
               </div>
+              <Link href={`/admin/bares/${r.id}`} className="rounded-lg border px-4 py-2 text-sm font-semibold">
+                Editar
+              </Link>
               {r.status === 'published' ? (
                 <form action={setVenueStatus} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="venue_id" value={r.id} />

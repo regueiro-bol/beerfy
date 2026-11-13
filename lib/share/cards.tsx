@@ -32,6 +32,13 @@ export function loadFonts() {
 
 /** Devuelve la imagen como data URL: foto propia (/venues/…) o, si no hay, la de ambiente. */
 export async function loadImage(cover: string | null, fallback = '/images/hero.jpg'): Promise<string> {
+  // Portadas subidas desde el admin (Supabase Storage): se descargan.
+  if (cover && /^https:\/\//.test(cover)) {
+    try {
+      const r = await fetch(cover, { signal: AbortSignal.timeout(5000) })
+      if (r.ok) return `data:${r.headers.get('content-type') || 'image/jpeg'};base64,${Buffer.from(await r.arrayBuffer()).toString('base64')}`
+    } catch {}
+  }
   const pick = cover && cover.startsWith('/') ? cover : fallback
   try {
     const buf = await readFile(join(process.cwd(), 'public', pick))

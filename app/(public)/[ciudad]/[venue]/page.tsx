@@ -121,8 +121,10 @@ export default async function VenueDetailPage({ params }: PageProps) {
     thumb: venue.cover_image_url ?? null,
     thumbLabel: score !== null ? formatScore(score) : null,
   }
-  const phone = live?.phone ?? venue.phone
-  const website = live?.website ?? venue.website
+  // Corregidos a mano en el admin: mandan sobre Google.
+  const manual = (venue as { contact_manual?: boolean }).contact_manual === true
+  const phone = manual ? venue.phone ?? live?.phone : live?.phone ?? venue.phone
+  const website = manual ? venue.website ?? live?.website : live?.website ?? venue.website
   const CRIT = [
     { name: 'Temperatura', v: criteria.temperature },
     { name: 'Espuma', v: criteria.foam },
