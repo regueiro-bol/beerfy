@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getArchivedVenue } from '@/lib/venues/archived'
+import { publicArchiveText } from '@/lib/venues/archive'
 import Link from 'next/link'
 import { getVenueBySlugs, getVenueScores, getVenueCriteria, getVenueBeers, timeAgo, MIN_VOTES } from '@/lib/supabase/queries'
 import { getLivePlace } from '@/lib/google/place-live'
@@ -48,8 +49,38 @@ export default async function VenueDetailPage({ params }: PageProps) {
           <p className="text-sm font-bold uppercase tracking-[0.12em] text-bottle">{gone.city.name}</p>
           <h1 className="font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] md:text-[60px]">{gone.name} ya no está en la guía</h1>
           <p className="text-lg leading-relaxed text-stone">
-            Hemos retirado este bar de Beerfy: por lo que sabemos, ya no sirve cerveza de bodega en tanque. Si no es así, cuéntanoslo y lo revisamos.
+            {publicArchiveText(gone.name, gone.reason)}
+            {gone.archivedAt
+              ? ` Lo retiramos de Beerfy en ${new Date(gone.archivedAt).toLocaleDateString('es-ES', { month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' })}.`
+              : ' Lo hemos retirado de Beerfy.'}{' '}
+            Si no es así, cuéntanoslo y lo revisamos.
           </p>
+
+          {gone.nearby.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              <h2 className="font-display text-[26px] font-extrabold">Cerveza de bodega cerca</h2>
+              <ul className="flex flex-col gap-3">
+                {gone.nearby.map((n) => (
+                  <li key={n.slug}>
+                    <Link
+                      href={`/${gone.city.slug}/${n.slug}`}
+                      className="flex items-center gap-4 rounded-2xl border-[1.5px] border-line bg-white p-4 transition hover:border-bottle"
+                    >
+                      <span className="flex-1">
+                        <span className="block text-[17px] font-bold">{n.name}</span>
+                        <span className="text-sm text-stone">
+                          {n.distanceM !== null ? (n.distanceM < 1000 ? `a ${Math.round(n.distanceM / 10) * 10} m` : `a ${(n.distanceM / 1000).toFixed(1).replace('.', ',')} km`) : gone.city.name}
+                          {n.score === null ? ` · nota en calibración (${n.votes}/${MIN_VOTES})` : ` · ${n.votes} puntuaciones`}
+                        </span>
+                      </span>
+                      {n.score !== null ? <span className="rounded-lg bg-amber px-2.5 py-1 font-extrabold text-ink">{formatScore(n.score)}</span> : null}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap gap-3">
             <Link href={`/${gone.city.slug}`} className="rounded-2xl bg-amber px-6 py-4 font-extrabold text-ink">
               Ver bares en {gone.city.name}

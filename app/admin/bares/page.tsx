@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import { setVenueStatus } from './actions'
 import { ConfirmButton } from './confirm-button'
+import { ARCHIVE_REASONS } from '@/lib/venues/archive'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,9 @@ type Row = {
   updated_at: string
   cities: { name: string; slug: string } | null
   venue_beers: Array<{ status: string; beers: { name: string } | null }>
+  archived_reason: string | null
+  archived_note: string | null
+  archived_at: string | null
 }
 
 const LABEL: Record<Row['status'], string> = { published: 'Publicado', archived: 'Desactivado', draft: 'Borrador' }
@@ -27,7 +31,7 @@ export default async function BaresAdminPage({ searchParams }: { searchParams: P
   const supabase = createServiceClient()
   let query = supabase
     .from('venues')
-    .select('id, name, slug, status, updated_at, cities(name, slug), venue_beers(status, beers(name))')
+    .select('id, name, slug, status, updated_at, cities(name, slug), venue_beers(status, beers(name)), archived_reason, archived_note, archived_at')
     .order('name')
   if (estado === 'publicados') query = query.eq('status', 'published')
   if (estado === 'desactivados') query = query.eq('status', 'archived')
@@ -99,11 +103,26 @@ export default async function BaresAdminPage({ searchParams }: { searchParams: P
                     </>
                   ) : null}
                 </p>
+                {r.status === 'archived' && (r.archived_reason || r.archived_at) ? (
+                  <p className="mt-1 text-sm text-red-900">
+                    {r.archived_reason ? ARCHIVE_REASONS[r.archived_reason as keyof typeof ARCHIVE_REASONS] ?? r.archived_reason : 'Desactivado'}
+                    {r.archived_at ? ` · ${new Date(r.archived_at).toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' })}` : ''}
+                    {r.archived_note ? ` · «${r.archived_note}»` : ''}
+                  </p>
+                ) : null}
               </div>
               {r.status === 'published' ? (
-                <form action={setVenueStatus}>
+                <form action={setVenueStatus} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="venue_id" value={r.id} />
                   <input type="hidden" name="status" value="archived" />
+                  <select name="reason" defaultValue="sin_tanque" aria-label="Motivo" className="rounded-lg border px-2 py-2 text-sm">
+                    {Object.entries(ARCHIVE_REASONS).map(([k, label]) => (
+                      <option key={k} value={k}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <input name="note" maxLength={300} placeholder="Nota (opcional)" aria-label="Nota" className="w-44 rounded-lg border px-2 py-2 text-sm" />
                   <ConfirmButton message={`¿Desactivar «${r.name}»? Dejará de verse en la web y en la app. Podrás reactivarlo cuando quieras.`} className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-800">
                     Desactivar
                   </ConfirmButton>

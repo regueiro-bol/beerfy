@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { formatScore } from '@/lib/format'
-import { reviewPhoto, reviewRating } from './actions'
+import { deletePhoto, reviewPhoto, reviewRating } from './actions'
+import { ConfirmButton } from '../bares/confirm-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -188,6 +189,12 @@ function PhotoCard({ p, src, beers, actionable }: { p: Photo; src?: string; beer
             </form>
           </div>
         ) : null}
+        <form action={deletePhoto} className="pt-1">
+          <input type="hidden" name="photo_id" value={p.id} />
+          <ConfirmButton message="¿Eliminar esta foto? Se borra el archivo y su registro. No cambia la cerveza confirmada del bar." className="text-xs font-semibold text-red-800 underline">
+            Eliminar foto
+          </ConfirmButton>
+        </form>
       </div>
     </div>
   )

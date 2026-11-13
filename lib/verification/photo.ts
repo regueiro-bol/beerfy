@@ -241,3 +241,18 @@ export async function submitPhotoCheck(input: {
 
   return { ok: status !== 'rechazada', status, message, beer: beerName }
 }
+
+/** Borra fotos de verificación: el archivo privado y su registro (p. ej. pruebas o fotos con caras). */
+export async function deletePhotoChecks(ids: string[]): Promise<number> {
+  const valid = ids.filter((id) => /^[0-9a-f-]{36}$/i.test(id))
+  if (!valid.length) return 0
+  const supabase = createServiceClient()
+  const { data: rows } = await supabase.from('photo_checks').select('id, storage_path').in('id', valid)
+  const paths = (rows || []).map((r) => r.storage_path as string)
+  if (paths.length) {
+    const { error } = await supabase.storage.from(BUCKET).remove(paths)
+    if (error) throw new Error(`No se pudieron borrar los archivos: ${error.message}`)
+  }
+  await supabase.from('photo_checks').delete().in('id', valid)
+  return rows?.length ?? 0
+}
