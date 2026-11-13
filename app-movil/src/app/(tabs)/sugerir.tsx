@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { IconCheck } from '@/components/icons'
 import { Body, Button, H1, Loading, s } from '@/components/ui'
 import { submitSuggestion } from '@/lib/api'
+import { pickPhoto, sendTankPhoto } from '@/lib/photo'
 import { useStore } from '@/lib/store'
 import { C, F } from '@/lib/theme'
 
@@ -20,6 +21,9 @@ export default function Sugerir() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const [suggestionId, setSuggestionId] = useState<string | null>(null)
+  const [photoMsg, setPhotoMsg] = useState<string | null>(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
 
   if (!data) return <Loading />
 
@@ -32,6 +36,22 @@ export default function Sugerir() {
     setNotify(false)
     setEmail('')
     setDone(false)
+    setSuggestionId(null)
+    setPhotoMsg(null)
+  }
+
+  async function addPhoto(source: 'camera' | 'library') {
+    if (!suggestionId) return
+    const p = await pickPhoto(source)
+    if (!p) return
+    if ('error' in p) {
+      setPhotoMsg(p.error)
+      return
+    }
+    setPhotoBusy(true)
+    const r = await sendTankPhoto(p, { suggestion_id: suggestionId })
+    setPhotoBusy(false)
+    setPhotoMsg(r.message)
   }
 
   async function send() {
@@ -47,7 +67,10 @@ export default function Sugerir() {
       email: notify ? email : undefined,
     })
     setSending(false)
-    if (res.ok) setDone(true)
+    if (res.ok) {
+      setSuggestionId(res.id ?? null)
+      setDone(true)
+    }
     else setError(res.error ?? 'No hemos podido enviar la sugerencia.')
   }
 
@@ -59,6 +82,27 @@ export default function Sugerir() {
         </View>
         <H1>¡Gracias por la pista!</H1>
         <Body>Revisamos cada bar antes de publicarlo. {notify ? 'Te escribiremos cuando esté en la guía.' : ''}</Body>
+        {suggestionId ? (
+          <View style={{ borderWidth: 1.5, borderStyle: 'dashed', borderColor: C.sand, borderRadius: 22, padding: 18, gap: 10, backgroundColor: C.white }}>
+            <Text style={{ fontFamily: F.display, fontSize: 19, color: C.ink }}>¿Tienes una foto del tanque?</Text>
+            <Text style={{ fontFamily: F.body, fontSize: 14, lineHeight: 20, color: C.stone }}>
+              Una foto del tanque o del grifo de bodega nos ayuda a verificar el bar antes. No se publica.
+            </Text>
+            {photoMsg ? (
+              <Text style={{ fontFamily: F.semibold, fontSize: 15, color: C.bottle }}>{photoMsg}</Text>
+            ) : (
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <Button
+                  label="Hacer foto"
+                  style={{ flex: 1, height: 48 }}
+                  loading={photoBusy}
+                  onPress={() => addPhoto('camera')}
+                />
+                <Button label="Galería" variant="outline" style={{ flex: 1, height: 48 }} disabled={photoBusy} onPress={() => addPhoto('library')} />
+              </View>
+            )}
+          </View>
+        ) : null}
         <Button label="Sugerir otro bar" variant="outline" onPress={reset} />
       </SafeAreaView>
     )

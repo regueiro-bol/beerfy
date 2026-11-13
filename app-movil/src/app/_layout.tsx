@@ -38,6 +38,7 @@ function Root() {
       <Stack.Screen name="bar/[id]" />
       <Stack.Screen name="ciudad/[slug]" />
       <Stack.Screen name="puntuar/[id]" options={{ presentation: 'fullScreenModal', contentStyle: { backgroundColor: C.ink } }} />
+      <Stack.Screen name="verificar/[id]" options={{ presentation: 'fullScreenModal', contentStyle: { backgroundColor: C.ink } }} />
       <Stack.Screen name="avisos" options={{ presentation: 'modal' }} />
     </Stack>
   )

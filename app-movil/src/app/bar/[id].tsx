@@ -205,6 +205,24 @@ export default function Ficha() {
             <Button label="Invitar" variant="amber" style={{ height: 46, paddingHorizontal: 16 }} icon={<IconShare color={C.ink} size={18} />} onPress={share} />
           </View>
 
+          {/* Confirmar el tanque con foto */}
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push({ pathname: '/verificar/[id]', params: { id: v.id } })}
+            style={({ pressed }) => [
+              { borderWidth: 1.5, borderStyle: 'dashed', borderColor: C.sand, borderRadius: 24, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.white },
+              pressed && { opacity: 0.85 },
+            ]}
+          >
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontFamily: F.display, fontSize: 18, color: C.ink }}>¿Estás en el bar? Confirma el tanque</Text>
+              <Text style={{ fontFamily: F.body, fontSize: 14, lineHeight: 19, color: C.stone }}>Una foto del tanque o del grifo de bodega mantiene la guía al día.</Text>
+            </View>
+            <View style={{ backgroundColor: C.bottle, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10 }}>
+              <Text style={{ fontFamily: F.bold, fontSize: 14, color: C.cream }}>Foto</Text>
+            </View>
+          </Pressable>
+
           {/* Sobre este bar */}
           <View style={{ gap: 10 }}>
             <Text style={[h2, { fontSize: 28 }]}>Sobre este bar</Text>
