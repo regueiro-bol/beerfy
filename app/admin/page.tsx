@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { PlusCircle, Inbox, ShieldCheck } from 'lucide-react'
+import { PlusCircle, Inbox, ShieldCheck, Store } from 'lucide-react'
 
 export default function AdminPage() {
   return (
@@ -37,6 +37,20 @@ export default function AdminPage() {
             </p>
           </CardContent>
         </Card>
+        </Link>
+
+        <Link href="/admin/bares" className="block group">
+          <Card className="h-full transition-shadow duration-200 group-hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xl font-bold">Bares</CardTitle>
+              <Store className="h-6 w-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Busca un bar y desactívalo (por ejemplo, si ya no tiene tanque) o vuelve a publicarlo. No se borra nada.
+              </p>
+            </CardContent>
+          </Card>
         </Link>
 
         <Link href="/admin/moderacion" className="block group">
