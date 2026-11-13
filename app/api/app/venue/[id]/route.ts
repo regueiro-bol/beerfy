@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const supabase = createServiceClient()
   const { data: venue } = await supabase
     .from('venues')
-    .select('id, description, description_edited_by_human, address, phone, website, google_place_id, latitude, longitude, status')
+    .select('id, description, description_edited_by_human, contact_manual, address, phone, website, google_place_id, latitude, longitude, status')
     .eq('id', id)
     .maybeSingle()
   if (!venue || venue.status !== 'published') return json({ error: 'not_found' }, { status: 404 })
@@ -29,8 +29,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       description: venue.description,
       descriptionReviewed: venue.description_edited_by_human === true,
       address: venue.address ? String(venue.address).replace(/,\s*(Spain|España)$/i, '') : null,
-      phone: live?.phone ?? venue.phone,
-      website: live?.website ?? venue.website,
+      phone: venue.contact_manual ? venue.phone ?? live?.phone : live?.phone ?? venue.phone,
+      website: venue.contact_manual ? venue.website ?? live?.website : live?.website ?? venue.website,
       mapsUri,
       beers: beers.map((b) => ({
         name: b.name,
