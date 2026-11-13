@@ -66,6 +66,14 @@
           "color": "#F2B33D"
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Beerfy usa la cámara para que hagas una foto del tanque o del grifo de bodega y así confirmar el bar. La foto no se publica.",
+          "photosPermission": "Beerfy accede a tus fotos para que elijas una del tanque o del grifo de bodega y así confirmar el bar. La foto no se publica.",
+          "microphonePermission": false
+        }
+      ],
       "expo-font"
     ],
     "experiments": {

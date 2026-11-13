@@ -88,7 +88,7 @@ export default function Puntuar() {
         <Text style={{ fontFamily: F.display, fontSize: 36, lineHeight: 38, color: C.cream }}>¡Tirada puntuada!</Text>
         <Text style={{ fontFamily: F.body, fontSize: 16, lineHeight: 23, color: C.sand }}>
           Le has dado un <Text style={{ fontFamily: F.display, color: C.amber }}>{formatScore(result.score)}</Text> a la caña de {v.name}.
-          {result.pending ? ' Hay muchas notas en este bar ahora mismo, así que la tuya se revisa antes de contar.' : ' Ya cuenta para su nota.'}
+          {result.pending ? ' La revisaremos antes de que cuente para su nota.' : ' Ya cuenta para su nota.'}
         </Text>
         <Button
           label="Compartir mi tirada"

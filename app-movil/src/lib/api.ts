@@ -111,7 +111,7 @@ export async function fetchVenue(id: string): Promise<VenueDetail> {
   return (await res.json()) as VenueDetail
 }
 
-export type Result = { ok: boolean; error?: string; score?: number; pending?: boolean; ratingId?: string }
+export type Result = { ok: boolean; error?: string; score?: number; pending?: boolean; ratingId?: string; id?: string }
 
 async function post(path: string, body: unknown): Promise<Result> {
   try {
