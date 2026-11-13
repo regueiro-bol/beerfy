@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
+import { deletePhotoChecks } from '@/lib/verification/photo'
 
 const now = () => new Date().toISOString()
 
@@ -45,4 +46,11 @@ export async function reviewPhoto(formData: FormData) {
     .eq('id', id)
   revalidatePath('/admin/moderacion')
   revalidatePath('/', 'layout')
+}
+
+/** Eliminar una foto (archivo y registro). No cambia la cerveza confirmada del bar. */
+export async function deletePhoto(formData: FormData) {
+  const id = String(formData.get('photo_id') || '')
+  await deletePhotoChecks([id])
+  revalidatePath('/admin/moderacion')
 }
