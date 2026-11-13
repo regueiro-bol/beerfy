@@ -184,8 +184,9 @@ export async function submitPhotoCheck(input: {
   const shows = ai && ['tanque', 'grifo_bodega', 'tanque_y_grifo'].includes(ai.muestra)
   // Sin coordenadas del bar no podemos comprobar que la foto es de allí: decide el equipo.
   const located = !venue || distance !== null
-  const clear = located && !!ai && !!shows && ai.confianza >= MIN_CONFIDENCE && !ai.parece_captura_o_de_internet && ai.dentro_de_bar !== false
-  const notTank = !!ai && (ai.muestra === 'otra_cosa' || ai.parece_captura_o_de_internet) && ai.confianza >= 0.7
+  // Que esté en el bar ya lo demuestra el GPS (y los tanques suelen estar en la bodega): no se exige que «parezca un bar».
+  const clear = located && !!ai && !!shows && ai.confianza >= MIN_CONFIDENCE && !ai.parece_captura_o_de_internet
+  const notTank = !!ai && (ai.muestra === 'otra_cosa' || ai.muestra === 'solo_vaso' || ai.parece_captura_o_de_internet) && ai.confianza >= 0.7
 
   let status: 'confirmada' | 'revisar' | 'rechazada' = 'revisar'
   let reason = ai ? ai.explicacion : 'Análisis automático no disponible'
@@ -196,7 +197,9 @@ export async function submitPhotoCheck(input: {
     status = 'rechazada'
     message = ai!.parece_captura_o_de_internet
       ? 'La foto parece una captura o una imagen de internet. Haz una foto tuya del tanque o del grifo en el bar.'
-      : 'No vemos un tanque ni el grifo de bodega en la foto. Prueba con otra en la que se vean bien.'
+      : ai!.muestra === 'solo_vaso'
+        ? 'Se ve la caña, pero necesitamos el tanque o el grifo con el rótulo de bodega. ¿Puedes hacer otra foto?'
+        : 'No vemos un tanque ni el grifo de bodega en la foto. Prueba con otra en la que se vean bien.'
   } else if (venue && clear) {
     // ¿Qué cerveza confirma? Solo se confirman las que ya están en el bar; una nueva la decide el equipo.
     const { data: rows } = await supabase.from('venue_beers').select('beer_id, status, source, beers(slug, name)').eq('venue_id', venue.id).neq('status', 'retirada')
