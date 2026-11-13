@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getArchivedVenue } from '@/lib/venues/archived'
 import Link from 'next/link'
 import { getVenueBySlugs, getVenueScores, getVenueCriteria, getVenueBeers, timeAgo, MIN_VOTES } from '@/lib/supabase/queries'
 import { getLivePlace } from '@/lib/google/place-live'
@@ -23,7 +24,10 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { ciudad, venue } = await params
   const data = await getVenueBySlugs(ciudad, venue)
-  if (!data) return {}
+  if (!data) {
+    const gone = await getArchivedVenue(ciudad, venue)
+    return gone ? { title: `${gone.name} ya no está en la guía`, robots: { index: false, follow: true } } : {}
+  }
   return {
     title: `${data.venue.name}, ${data.city.name}: cerveza de bodega`,
     description: data.venue.description || `${data.venue.name} en ${data.city.name}: cómo tiran la cerveza de bodega.`,
@@ -34,7 +38,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function VenueDetailPage({ params }: PageProps) {
   const { ciudad, venue: venueSlug } = await params
   const data = await getVenueBySlugs(ciudad, venueSlug)
-  if (!data) notFound()
+  if (!data) {
+    const gone = await getArchivedVenue(ciudad, venueSlug)
+    if (!gone) notFound()
+    return (
+      <main>
+        <SiteHeader />
+        <section className="mx-auto flex max-w-[760px] flex-col gap-6 px-5 py-16">
+          <p className="text-sm font-bold uppercase tracking-[0.12em] text-bottle">{gone.city.name}</p>
+          <h1 className="font-display text-[44px] font-extrabold leading-[0.95] tracking-[-0.03em] md:text-[60px]">{gone.name} ya no está en la guía</h1>
+          <p className="text-lg leading-relaxed text-stone">
+            Hemos retirado este bar de Beerfy: por lo que sabemos, ya no sirve cerveza de bodega en tanque. Si no es así, cuéntanoslo y lo revisamos.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href={`/${gone.city.slug}`} className="rounded-2xl bg-amber px-6 py-4 font-extrabold text-ink">
+              Ver bares en {gone.city.name}
+            </Link>
+            <Link href="/sugerir" className="rounded-2xl border-[1.5px] border-line px-6 py-4 font-bold">
+              Avisar de que sí tiene tanque
+            </Link>
+          </div>
+        </section>
+      </main>
+    )
+  }
 
   const { venue, city } = data
   const schema = getVenueBarOrPubSchema(venue, city)
