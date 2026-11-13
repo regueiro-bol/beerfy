@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { track } from '@/lib/analytics'
+import { shrink } from '@/lib/client/shrink-image'
 import { submitSuggestion, type SuggestState } from './actions'
 
 type City = { id: string; name: string; slug: string }
@@ -21,9 +22,12 @@ export function SuggestForm({ cities, defaultCity }: { cities: City[]; defaultCi
 
   if (state.ok) {
     return (
-      <div className="rounded-[28px] bg-bottle p-8 text-cream">
-        <p className="font-display text-[36px] font-extrabold leading-tight">¡Gracias! Sugerencia recibida.</p>
-        <p className="mt-3 text-lg text-sand">La revisaremos antes de publicar el bar. Si nos dejaste tu email, te avisaremos.</p>
+      <div className="flex flex-col gap-5">
+        <div className="rounded-[28px] bg-bottle p-8 text-cream">
+          <p className="font-display text-[36px] font-extrabold leading-tight">¡Gracias! Sugerencia recibida.</p>
+          <p className="mt-3 text-lg text-sand">La revisaremos antes de publicar el bar. Si nos dejaste tu email, te avisaremos.</p>
+        </div>
+        {state.id ? <SuggestionPhoto suggestionId={state.id} /> : null}
       </div>
     )
   }
@@ -103,5 +107,45 @@ export function SuggestForm({ cities, defaultCity }: { cities: City[]; defaultCi
       </button>
       <p className="text-xs text-stone">Revisamos cada sugerencia a mano antes de publicarla.</p>
     </form>
+  )
+}
+
+/** Foto opcional del tanque para la sugerencia: acelera la verificación. */
+function SuggestionPhoto({ suggestionId }: { suggestionId: string }) {
+  const [msg, setMsg] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  async function upload(file: File | null) {
+    if (!file) return
+    setBusy(true)
+    setMsg(null)
+    try {
+      const fd = new FormData()
+      fd.append('photo', await shrink(file), 'tanque.jpg')
+      fd.append('suggestion_id', suggestionId)
+      const r = await fetch('/api/photo-check', { method: 'POST', body: fd })
+      const json = (await r.json()) as { message: string; status?: string }
+      setMsg(json.message)
+      track('photo_check', { item_id: 'sugerencia', status: json.status ?? 'error' })
+    } catch {
+      setMsg('No hemos podido enviar la foto. Inténtalo de nuevo.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="rounded-[24px] border-[1.5px] border-dashed border-sand bg-white p-6">
+      <p className="font-display text-[22px] font-extrabold">¿Tienes una foto del tanque?</p>
+      <p className="mt-1 text-[15px] text-stone">Si estás en el bar, una foto del tanque o del grifo de bodega nos ayuda a verificarlo antes. No se publica.</p>
+      {msg ? (
+        <p className="mt-4 font-semibold text-bottle">{msg}</p>
+      ) : (
+        <label className="mt-4 inline-flex h-12 cursor-pointer items-center rounded-2xl bg-ink px-5 font-bold text-cream">
+          {busy ? 'Enviando…' : 'Añadir foto'}
+          <input type="file" accept="image/*" capture="environment" className="sr-only" disabled={busy} onChange={(e) => upload(e.target.files?.[0] ?? null)} />
+        </label>
+      )}
+    </div>
   )
 }

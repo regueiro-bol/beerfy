@@ -21,6 +21,7 @@ export const BFY_EVENTS = [
   'pwa_install',
   'pwa_installed',
   'pwa_dismiss',
+  'photo_check',
 ] as const
 
 export type BfyEvent = (typeof BFY_EVENTS)[number]

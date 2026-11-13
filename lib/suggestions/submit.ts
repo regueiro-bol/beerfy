@@ -13,7 +13,7 @@ export type SuggestInput = {
   email?: string
 }
 
-export type SuggestResult = { ok: boolean; error?: string }
+export type SuggestResult = { ok: boolean; error?: string; id?: string }
 
 const cut = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
 
@@ -58,5 +58,5 @@ export async function saveSuggestion(input: SuggestInput): Promise<SuggestResult
   } catch (e) {
     console.error('Auto-validation failed:', e)
   }
-  return { ok: true }
+  return { ok: true, id: inserted?.id as string | undefined }
 }

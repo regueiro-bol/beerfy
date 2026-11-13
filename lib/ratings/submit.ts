@@ -1,5 +1,6 @@
 import { createHash } from 'crypto'
 import { createServiceClient } from '@/lib/supabase/service'
+import { moderateRating } from '@/lib/moderation/rating'
 
 /** Lógica común para puntuar una tirada (web y app). */
 
@@ -88,9 +89,14 @@ export async function saveRating(input: RateInput, clientHash: string, userAgent
     .select('id', { count: 'exact', head: true })
     .eq('venue_id', input.venueId)
     .gte('created_at', hourAgo)
-  const status = (lastHour ?? 0) >= BURST_PER_HOUR ? 'pendiente' : 'visible'
-
   const avg = (scores.score_temperature! + scores.score_foam! + scores.score_glass! + scores.score_freshness!) / 4
+
+  // Moderación: reglas antifraude y revisión del comentario con IA.
+  const mod = await moderateRating({ venueId: input.venueId, comment, avg, clientHash })
+  if (mod.returnToUser) return { ok: false, error: mod.returnToUser }
+  const burst = (lastHour ?? 0) >= BURST_PER_HOUR
+  const status = burst ? 'pendiente' : mod.status
+  const reason = burst ? ['muchas notas en este bar en la última hora', mod.reason].filter(Boolean).join('; ') : mod.reason
   const { data: inserted, error } = await supabase
     .from('ratings')
     .insert({
@@ -101,6 +107,9 @@ export async function saveRating(input: RateInput, clientHash: string, userAgent
       ip_hash: clientHash,
       user_agent: userAgent.slice(0, 300),
       status,
+      moderation: mod.detail,
+      moderation_reason: reason,
+      moderated_at: new Date().toISOString(),
     })
     .select('id')
     .single()
