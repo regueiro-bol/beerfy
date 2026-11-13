@@ -16,7 +16,7 @@ import { createServiceClient } from '@/lib/supabase/service'
  * reducida a 1600 px. No se publica: solo la ve el equipo para verificar.
  */
 
-export const PHOTO_PROMPT_VERSION = 'tank_photo_v1'
+export const PHOTO_PROMPT_VERSION = 'tank_photo_v2'
 const BUCKET = 'verificaciones'
 const RADIUS_M = 120
 const MIN_CONFIDENCE = 0.8
@@ -47,7 +47,7 @@ Tienes que decir qué se ve. Pistas:
 - Grifo de bodega: grifo o columna de cerveza con un rótulo o chapa de «Cerveza de Bodega», «Estrella Galicia de Bodega», «1906 de Bodega» o «Mahou de Bodega/Tanque».
 - Una caña o un vaso solos no demuestran que haya tanque ("solo_vaso").
 - Si parece una captura de pantalla, una foto de internet, publicidad o una imagen generada, márcalo.
-Sé prudente: la confianza alta (0,8 o más) es solo cuando el tanque o el rótulo se ven con claridad.
+"confianza" es lo seguro que estás de que tu respuesta en "muestra" es correcta (no la probabilidad de que haya un tanque): una foto que claramente es solo una caña lleva "solo_vaso" con confianza alta. Para "tanque" o "grifo_bodega", da 0,8 o más solo si el tanque o el rótulo se ven con claridad.
 "producto": el nombre de la cerveza que se lee (por ejemplo "Estrella Galicia de Bodega", "1906 de Bodega") o "" si no se lee.
 "explicacion": una frase en español, para el equipo.`
 
@@ -63,7 +63,7 @@ const TOOL: Anthropic.Tool = {
       dentro_de_bar: { type: 'boolean' },
       parece_captura_o_de_internet: { type: 'boolean' },
       hay_caras: { type: 'boolean' },
-      confianza: { type: 'number', minimum: 0, maximum: 1 },
+      confianza: { type: 'number', minimum: 0, maximum: 1, description: 'Seguridad (0 a 1) de que la clasificación de «muestra» es correcta.' },
       explicacion: { type: 'string' },
     },
     required: ['muestra', 'marca', 'producto', 'dentro_de_bar', 'parece_captura_o_de_internet', 'hay_caras', 'confianza', 'explicacion'],
