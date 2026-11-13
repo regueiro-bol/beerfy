@@ -241,6 +241,20 @@ export default async function VenueDetailPage({ params }: PageProps) {
 
           <ShareSheet {...shareProps} trigger="invite" />
 
+          <Link
+            href={`/${city.slug}/${venue.slug}/verificar`}
+            data-track="cta_click"
+            data-track-location="ficha_verificar"
+            data-track-item-id={venue.slug}
+            className="flex items-center gap-4 rounded-[24px] border-[1.5px] border-dashed border-sand bg-white p-5 transition hover:border-bottle"
+          >
+            <span className="flex-1">
+              <span className="block font-display text-[20px] font-extrabold">¿Estás en el bar? Confirma el tanque</span>
+              <span className="mt-1 block text-[15px] text-stone">Una foto del tanque o del grifo de bodega nos ayuda a mantener la guía al día.</span>
+            </span>
+            <span className="rounded-2xl bg-bottle px-4 py-3 text-sm font-bold text-cream">Foto</span>
+          </Link>
+
           {criteria.comments.length > 0 && (
             <div>
               <h2 className="mb-4 font-display text-[28px] font-extrabold">Últimas tiradas</h2>

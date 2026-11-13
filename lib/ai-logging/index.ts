@@ -15,7 +15,7 @@ export interface AiUsageRecord {
 }
 
 export async function logAiUsage(record: AiUsageRecord): Promise<void> {
-  const cost = estimateCostUsd(record.inputTokens, record.outputTokens)
+  const cost = estimateCostUsd(record.inputTokens, record.outputTokens, record.model)
   console.log('[AI USAGE]', { ...record, estimatedCostUsd: cost.toFixed(4) })
 
   try {
