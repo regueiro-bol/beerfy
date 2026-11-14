@@ -8,6 +8,7 @@ import { submitRating, type RateState } from './actions'
 import { ShareSheet } from '@/components/share/share-sheet'
 import { SITE_URL } from '@/lib/site'
 import { track } from '@/lib/analytics'
+import { PourPhotoUploads, ServedPhotoPicker, type Served } from './pour-photos'
 
 const CRITERIA = [
   { key: 'score_temperature', n: '01', name: 'Temperatura', hint: 'Fría, pero que sepa', tint: 'bg-bottle text-cream' },
@@ -24,6 +25,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
   const [v, setV] = useState<Record<Key, number>>({ score_temperature: 0, score_foam: 0, score_glass: 0, score_freshness: 0 })
   const [geo, setGeo] = useState<'idle' | 'locating' | 'error'>('idle')
   const [geoMsg, setGeoMsg] = useState('')
+  const [served, setServed] = useState<Served | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const latRef = useRef<HTMLInputElement>(null)
   const lngRef = useRef<HTMLInputElement>(null)
@@ -80,6 +82,7 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
             Tu tirada en {venueName}: <span className="text-amber">{score}</span>
           </p>
           <p className="text-[15px] text-sand">{state.pending ? 'La revisaremos antes de publicarla.' : 'Ya cuenta en la Nota de tirada.'}</p>
+          {state.ratingId && state.photoToken ? <PourPhotoUploads ratingId={state.ratingId} token={state.photoToken} served={served} /> : null}
           {story && (
             <div className="hidden md:block">
               <ShareSheet
@@ -139,6 +142,8 @@ export function RateForm({ venueId, venueName, path }: { venueId: string; venueN
       <div className="hidden" aria-hidden="true">
         <label>No rellenar<input name="website" tabIndex={-1} autoComplete="off" /></label>
       </div>
+
+      <ServedPhotoPicker value={served} onChange={setServed} />
 
       <div className="flex items-center gap-5 rounded-[28px] bg-ink p-5 text-cream md:p-6">
         <svg viewBox="0 0 104 140" width="78" height="105" role="img" aria-label={`Vaso lleno según tu nota: ${formatScore(score)}`}>

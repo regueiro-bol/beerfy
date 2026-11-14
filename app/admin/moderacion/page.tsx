@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { formatScore } from '@/lib/format'
-import { deletePhoto, reviewPhoto, reviewRating } from './actions'
+import { deletePhoto, reviewPhoto, reviewPourPhoto, reviewRating } from './actions'
 import { ConfirmButton } from '../bares/confirm-button'
 
 export const dynamic = 'force-dynamic'
@@ -17,6 +17,20 @@ type PendingRating = {
   moderation_reason: string | null
   venues: { name: string } | null
 }
+type PourPhoto = {
+  id: string
+  kind: 'servida' | 'encaje'
+  storage_path: string
+  fresh: boolean | null
+  ai_score: number | null
+  ai_comment: string | null
+  ai_result: Record<string, unknown> | null
+  team_agrees: boolean | null
+  uploaded_at: string
+  venues: { name: string } | null
+  ratings: { score_temperature: number; score_foam: number; score_glass: number; score_freshness: number } | null
+}
+
 type Photo = {
   id: string
   status: string
@@ -39,7 +53,7 @@ const fecha = (iso: string) => new Date(iso).toLocaleString('es-ES', { dateStyle
 
 export default async function ModerationPage() {
   const supabase = createServiceClient()
-  const [{ data: ratings }, { data: photos }, { data: recent }, { data: beers }, { data: cost }] = await Promise.all([
+  const [{ data: ratings }, { data: photos }, { data: recent }, { data: beers }, { data: cost }, { data: pours }] = await Promise.all([
     supabase
       .from('ratings')
       .select('id, comment, created_at, rating, score_temperature, score_foam, score_glass, score_freshness, moderation_reason, venues(name)')
@@ -60,16 +74,24 @@ export default async function ModerationPage() {
     supabase
       .from('ai_usage_log')
       .select('estimated_cost_usd')
-      .in('function_name', ['rating_moderation', 'tank_photo_check'])
+      .in('function_name', ['rating_moderation', 'tank_photo_check', 'pour_servida', 'pour_encaje'])
       .gte('created_at', monthAgoIso()),
+    supabase
+      .from('rating_photos')
+      .select('id, kind, storage_path, fresh, ai_score, ai_comment, ai_result, team_agrees, uploaded_at, venues(name), ratings(score_temperature, score_foam, score_glass, score_freshness)')
+      .order('uploaded_at', { ascending: false })
+      .limit(40),
   ])
+  const pourList = (pours || []) as unknown as PourPhoto[]
+  const reviewedPours = pourList.filter((p) => p.team_agrees !== null)
+  const agreeRate = reviewedPours.length ? Math.round((reviewedPours.filter((p) => p.team_agrees).length / reviewedPours.length) * 100) : null
   const pending = (ratings || []) as unknown as PendingRating[]
   const toReview = (photos || []) as unknown as Photo[]
   const done = (recent || []) as unknown as Photo[]
   const spent = (cost || []).reduce((a, r) => a + Number(r.estimated_cost_usd || 0), 0)
 
   // Enlaces temporales (1 h) para ver las fotos privadas.
-  const paths = [...toReview, ...done].map((p) => p.storage_path)
+  const paths = [...toReview, ...done, ...pourList].map((p) => p.storage_path)
   const signed = paths.length ? (await supabase.storage.from('verificaciones').createSignedUrls(paths, 3600)).data ?? [] : []
   const url = (path: string) => signed.find((s) => s.path === path)?.signedUrl ?? undefined
 
@@ -120,6 +142,61 @@ export default async function ModerationPage() {
         {toReview.map((p) => (
           <PhotoCard key={p.id} p={p} src={url(p.storage_path)} beers={beers || []} actionable />
         ))}
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold">Calibración: fotos de cañas ({pourList.length})</h2>
+          <p className="text-sm text-muted-foreground">
+            La IA valora el aspecto de la caña recién servida y el encaje de Bruselas. De momento solo lo ves tú. Marca si estás de acuerdo:{' '}
+            {agreeRate === null ? 'aún sin valoraciones.' : `de acuerdo en el ${agreeRate} % de ${reviewedPours.length} fotos revisadas.`}
+          </p>
+        </div>
+        {pourList.length === 0 ? <p className="text-muted-foreground">Aún no hay fotos de cañas.</p> : null}
+        <div className="grid gap-4 md:grid-cols-2">
+          {pourList.map((p) => {
+            const src = url(p.storage_path)
+            const r = p.ratings
+            const userScore = r ? ((r.score_temperature + r.score_foam + r.score_glass + r.score_freshness) / 4) * 2 : null
+            return (
+              <div key={p.id} className="flex gap-4 rounded-xl border bg-background p-4">
+                {src ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={src} alt="" className="h-44 w-32 shrink-0 rounded-lg object-cover" />
+                ) : (
+                  <div className="h-44 w-32 shrink-0 rounded-lg bg-muted" />
+                )}
+                <div className="min-w-0 flex-1 space-y-1 text-sm">
+                  <p className="font-bold">
+                    {p.venues?.name ?? 'Bar'} · {p.kind === 'servida' ? 'Recién servida' : 'Encaje'}
+                    {p.fresh === false ? <span className="ml-1 rounded bg-amber-100 px-1.5 text-xs text-amber-900">no reciente</span> : null}
+                  </p>
+                  <p>
+                    IA: <strong>{p.ai_score === null ? '—' : formatScore(Number(p.ai_score))}</strong>
+                    {userScore !== null ? ` · nota de la persona: ${formatScore(userScore)}` : ''}
+                  </p>
+                  {p.ai_comment ? <p className="text-muted-foreground">«{p.ai_comment}»</p> : null}
+                  <p className="text-xs text-muted-foreground">{fecha(p.uploaded_at)}</p>
+                  <div className="flex gap-2 pt-1">
+                    {(['si', 'no'] as const).map((a) => (
+                      <form key={a} action={reviewPourPhoto}>
+                        <input type="hidden" name="photo_id" value={p.id} />
+                        <input type="hidden" name="agrees" value={a} />
+                        <button
+                          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                            p.team_agrees === (a === 'si') ? (a === 'si' ? 'bg-emerald-700 text-white' : 'bg-red-700 text-white') : 'border'
+                          }`}
+                        >
+                          {a === 'si' ? 'De acuerdo' : 'No de acuerdo'}
+                        </button>
+                      </form>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </section>
 
       <section className="space-y-4">

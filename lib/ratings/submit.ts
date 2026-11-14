@@ -13,7 +13,7 @@ export type RateInput = {
   acc?: number
 }
 
-export type RateResult = { ok: boolean; error?: string; score?: number; pending?: boolean; ratingId?: string }
+export type RateResult = { ok: boolean; error?: string; score?: number; pending?: boolean; ratingId?: string; photoToken?: string }
 
 export const RATING_KEYS = ['score_temperature', 'score_foam', 'score_glass', 'score_freshness'] as const
 
@@ -29,6 +29,11 @@ function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: numbe
   const dLng = toRad(b.lng - a.lng)
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2
   return 2 * R * Math.asin(Math.sqrt(h))
+}
+
+/** Clave para añadir fotos de la caña a una nota recién creada (solo la tiene quien puntuó). */
+export function photoToken(ratingId: string) {
+  return hashClient(`photo:${ratingId}`).slice(0, 32)
 }
 
 export function hashClient(id: string) {
@@ -117,5 +122,6 @@ export async function saveRating(input: RateInput, clientHash: string, userAgent
     console.error('Error saving rating:', error)
     return { ok: false, error: 'No hemos podido guardar tu nota. Inténtalo de nuevo.' }
   }
-  return { ok: true, score: avg * 2, pending: status === 'pendiente', ratingId: inserted?.id as string | undefined }
+  const ratingId = inserted?.id as string | undefined
+  return { ok: true, score: avg * 2, pending: status === 'pendiente', ratingId, photoToken: ratingId ? photoToken(ratingId) : undefined }
 }
