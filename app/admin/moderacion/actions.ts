@@ -54,3 +54,13 @@ export async function deletePhoto(formData: FormData) {
   await deletePhotoChecks([id])
   revalidatePath('/admin/moderacion')
 }
+
+/** Calibración: ¿está el equipo de acuerdo con la valoración de la IA de esta foto de caña? */
+export async function reviewPourPhoto(formData: FormData) {
+  const id = String(formData.get('photo_id') || '')
+  const agrees = String(formData.get('agrees') || '')
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !['si', 'no'].includes(agrees)) return
+  const supabase = createServiceClient()
+  await supabase.from('rating_photos').update({ team_agrees: agrees === 'si', reviewed_at: new Date().toISOString() }).eq('id', id)
+  revalidatePath('/admin/moderacion')
+}

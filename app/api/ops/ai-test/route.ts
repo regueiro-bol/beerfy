@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { opsAuthorized } from '@/lib/ops/auth'
 import { aiReview } from '@/lib/moderation/rating'
 import { analyzeTankPhoto } from '@/lib/verification/photo'
+import { analyzePour, toJpeg } from '@/lib/verification/pour'
 
 export const maxDuration = 120
 
@@ -12,7 +13,7 @@ export const maxDuration = 120
  */
 export async function POST(req: Request) {
   if (!opsAuthorized(req)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  const body = (await req.json().catch(() => ({}))) as { comments?: string[]; photoUrls?: string[] }
+  const body = (await req.json().catch(() => ({}))) as { comments?: string[]; photoUrls?: string[]; pourUrls?: Array<{ url: string; kind: 'servida' | 'encaje' }> }
   const comments = await Promise.all(
     (body.comments ?? []).slice(0, 20).map(async (c) => {
       try {
@@ -33,5 +34,15 @@ export async function POST(req: Request) {
       }
     })
   )
-  return NextResponse.json({ comments, photos })
+  const pours = await Promise.all(
+    (body.pourUrls ?? []).slice(0, 10).map(async (p) => {
+      try {
+        const r = await fetch(p.url)
+        return { url: p.url, kind: p.kind, result: await analyzePour(await toJpeg(await r.arrayBuffer()), p.kind === 'encaje' ? 'encaje' : 'servida') }
+      } catch (e) {
+        return { url: p.url, error: (e as Error).message }
+      }
+    })
+  )
+  return NextResponse.json({ comments, photos, pours })
 }
