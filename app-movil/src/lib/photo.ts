@@ -54,3 +54,22 @@ export async function sendTankPhoto(
     return { ok: false, message: 'Sin conexión. Comprueba tu cobertura e inténtalo de nuevo.' }
   }
 }
+
+/** Foto de la caña de una nota: «servida» (recién tirada) o «encaje» (a medio beber). */
+export async function sendRatingPhoto(
+  photo: Picked,
+  fields: { rating_id: string; token: string; kind: 'servida' | 'encaje'; taken_at: number }
+): Promise<{ ok: boolean; message: string }> {
+  try {
+    const uri = await shrink(photo)
+    const fd = new FormData()
+    if (Platform.OS === 'web') fd.append('photo', await (await fetch(uri)).blob(), `${fields.kind}.jpg`)
+    else fd.append('photo', { uri, name: `${fields.kind}.jpg`, type: 'image/jpeg' } as unknown as Blob)
+    for (const [k, v] of Object.entries(fields)) fd.append(k, String(v))
+    const res = await fetch(`${SITE}/api/rating-photo`, { method: 'POST', body: fd, headers: { 'X-Beerfy-Install': await getInstallId() } })
+    const json = (await res.json().catch(() => null)) as { ok: boolean; message: string } | null
+    return json ?? { ok: false, message: 'No hemos podido enviar la foto.' }
+  } catch {
+    return { ok: false, message: 'Sin conexión. Inténtalo de nuevo.' }
+  }
+}
