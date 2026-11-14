@@ -1,11 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState } from 'react'
+import { Image } from 'expo-image'
 import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IconCheck, IconPin } from '@/components/icons'
 import { TopBar } from '@/components/top-bar'
 import { Button, Loading } from '@/components/ui'
 import { submitRating } from '@/lib/api'
+import { pickPhoto, sendRatingPhoto, type Picked } from '@/lib/photo'
 import { distanceM, formatDistance, formatScore } from '@/lib/format'
 import { useStore, useVenue } from '@/lib/store'
 import { C, F } from '@/lib/theme'
@@ -34,7 +36,12 @@ export default function Puntuar() {
   const [geoState, setGeoState] = useState<'locating' | 'ok' | 'far' | 'none'>('locating')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [result, setResult] = useState<{ score: number; pending: boolean } | null>(null)
+  const [result, setResult] = useState<{ score: number; pending: boolean; ratingId?: string; token?: string } | null>(null)
+  const [served, setServed] = useState<{ photo: Picked; takenAt: number } | null>(null)
+  const [servedMsg, setServedMsg] = useState<string | null>(null)
+  const [laceMsg, setLaceMsg] = useState<string | null>(null)
+  const [laceBusy, setLaceBusy] = useState(false)
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   function evaluate(c: { lat: number; lng: number; acc?: number } | null) {
     if (!c || !v || v.lat === null || v.lng === null) {
@@ -74,7 +81,11 @@ export default function Puntuar() {
     const res = await submitRating({ venue_id: v.id, ...vals, comment: comment.trim() || undefined, lat: c.lat, lng: c.lng, acc: c.acc ? Math.round(c.acc) : undefined })
     setSending(false)
     if (res.ok) {
-      setResult({ score: res.score ?? avg ?? 0, pending: !!res.pending })
+      setResult({ score: res.score ?? avg ?? 0, pending: !!res.pending, ratingId: res.ratingId, token: res.photoToken })
+      if (served && res.ratingId && res.photoToken) {
+        setServedMsg('Enviando la foto de tu caña…')
+        sendRatingPhoto(served.photo, { rating_id: res.ratingId, token: res.photoToken, kind: 'servida', taken_at: served.takenAt }).then((r) => setServedMsg(r.message))
+      }
       refresh()
     } else setError(res.error ?? 'No hemos podido guardar tu nota.')
   }
@@ -90,6 +101,37 @@ export default function Puntuar() {
           Le has dado un <Text style={{ fontFamily: F.display, color: C.amber }}>{formatScore(result.score)}</Text> a la caña de {v.name}.
           {result.pending ? ' La revisaremos antes de que cuente para su nota.' : ' Ya cuenta para su nota.'}
         </Text>
+        {servedMsg ? <Text style={{ fontFamily: F.body, fontSize: 14, color: C.sand }}>{servedMsg}</Text> : null}
+        {result.ratingId && result.token ? (
+          <View style={{ backgroundColor: 'rgba(246,241,228,0.08)', borderRadius: 22, padding: 16, gap: 8 }}>
+            <Text style={{ fontFamily: F.display, fontSize: 20, color: C.cream }}>¿Vas por la mitad? Enséñanos el encaje</Text>
+            <Text style={{ fontFamily: F.body, fontSize: 14, lineHeight: 20, color: C.sand }}>
+              Los aros de espuma que quedan en el vaso con cada trago (el «encaje de Bruselas») delatan un vaso limpio y una buena cerveza.
+            </Text>
+            {laceMsg ? (
+              <Text style={{ fontFamily: F.semibold, fontSize: 15, color: C.amber }}>{laceMsg}</Text>
+            ) : (
+              <Button
+                label="Foto del encaje"
+                variant="amber"
+                style={{ height: 48 }}
+                loading={laceBusy}
+                onPress={async () => {
+                  const p = await pickPhoto('camera')
+                  if (!p) return
+                  if ('error' in p) {
+                    setLaceMsg(p.error)
+                    return
+                  }
+                  setLaceBusy(true)
+                  const r = await sendRatingPhoto(p, { rating_id: result.ratingId!, token: result.token!, kind: 'encaje', taken_at: Date.now() })
+                  setLaceBusy(false)
+                  setLaceMsg(r.message)
+                }}
+              />
+            )}
+          </View>
+        ) : null}
         <Button
           label="Compartir mi tirada"
           variant="amber"
@@ -133,6 +175,36 @@ export default function Puntuar() {
             )}
           </View>
         )}
+
+        <View style={{ borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#3D362A', borderRadius: 22, padding: 16, gap: 10 }}>
+          <Text style={{ fontFamily: F.bold, fontSize: 16, color: C.cream }}>Foto de la caña recién servida (opcional)</Text>
+          <Text style={{ fontFamily: F.body, fontSize: 13, lineHeight: 19, color: '#A89F8B' }}>
+            Hazla en cuanto te la pongan, antes del primer trago: la espuma lo dice todo. Luego cátala y puntúa.
+          </Text>
+          {served ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Image source={{ uri: served.photo.uri }} style={{ width: 72, height: 96, borderRadius: 12 }} contentFit="cover" accessibilityLabel="Tu caña" />
+              <Pressable accessibilityRole="button" onPress={() => setServed(null)} style={{ minHeight: 44, justifyContent: 'center' }}>
+                <Text style={{ fontFamily: F.semibold, fontSize: 14, color: C.sand, textDecorationLine: 'underline' }}>Quitar foto</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Button
+              label="Hacer foto de la caña"
+              variant="outline"
+              textColor={C.cream}
+              style={{ height: 46, borderColor: 'rgba(246,241,228,0.4)' }}
+              onPress={async () => {
+                setPhotoError(null)
+                const p = await pickPhoto('camera')
+                if (!p) return
+                if ('error' in p) setPhotoError(p.error)
+                else setServed({ photo: p, takenAt: Date.now() })
+              }}
+            />
+          )}
+          {photoError ? <Text style={{ fontFamily: F.semibold, fontSize: 13, color: '#F2A08A' }}>{photoError}</Text> : null}
+        </View>
 
         <Text style={{ fontFamily: F.display, fontSize: 30, lineHeight: 32, color: C.cream }}>¿Cómo te la han tirado?</Text>
 
