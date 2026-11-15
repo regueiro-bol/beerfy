@@ -1,6 +1,5 @@
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
-import { Platform } from 'react-native'
 import { getInstallId, SITE } from './api'
 
 export type PhotoResult = { ok: boolean; status?: 'confirmada' | 'revisar' | 'rechazada'; message: string; beer?: string | null }
@@ -19,17 +18,28 @@ export async function pickPhoto(source: 'camera' | 'library'): Promise<Picked | 
   return { uri: a.uri, width: a.width, height: a.height }
 }
 
-/** Reduce la foto a 1600 px como máximo (JPEG): sube rápido y gasta pocos datos. */
-async function shrink(p: Picked): Promise<string> {
-  try {
-    const ctx = ImageManipulator.manipulate(p.uri)
-    if (Math.max(p.width, p.height) > 1600) ctx.resize(p.width >= p.height ? { width: 1600 } : { height: 1600 })
-    const img = await ctx.renderAsync()
-    const out = await img.saveAsync({ compress: 0.8, format: SaveFormat.JPEG })
-    return out.uri
-  } catch {
-    return p.uri
-  }
+/**
+ * Reduce la foto a 1600 px como máximo (JPEG) y la devuelve en base64.
+ * Se envía como JSON: el fetch de Expo no admite archivos dentro de FormData en iOS/Android.
+ */
+async function toBase64(p: Picked): Promise<string> {
+  const ctx = ImageManipulator.manipulate(p.uri)
+  if (Math.max(p.width, p.height) > 1600) ctx.resize(p.width >= p.height ? { width: 1600 } : { height: 1600 })
+  const img = await ctx.renderAsync()
+  const out = await img.saveAsync({ compress: 0.8, format: SaveFormat.JPEG, base64: true })
+  if (!out.base64) throw new Error('sin base64')
+  return out.base64
+}
+
+async function postPhoto<T>(path: string, photo: Picked, fields: Record<string, string | number | undefined | null>): Promise<T | null> {
+  const body: Record<string, string | number> = { photo_base64: await toBase64(photo) }
+  for (const [k, v] of Object.entries(fields)) if (v !== undefined && v !== null && !(typeof v === 'number' && !Number.isFinite(v))) body[k] = v
+  const res = await fetch(`${SITE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Beerfy-Install': await getInstallId() },
+    body: JSON.stringify(body),
+  })
+  return (await res.json().catch(() => null)) as T | null
 }
 
 /** Envía la foto del tanque a Beerfy (bar, con ubicación) o a una sugerencia recién enviada. */
@@ -38,17 +48,7 @@ export async function sendTankPhoto(
   fields: { venue_id?: string; suggestion_id?: string; lat?: number; lng?: number; acc?: number }
 ): Promise<PhotoResult> {
   try {
-    const uri = await shrink(photo)
-    const fd = new FormData()
-    if (Platform.OS === 'web') {
-      fd.append('photo', await (await fetch(uri)).blob(), 'tanque.jpg')
-    } else {
-      // React Native envía el archivo a partir de su uri.
-      fd.append('photo', { uri, name: 'tanque.jpg', type: 'image/jpeg' } as unknown as Blob)
-    }
-    for (const [k, v] of Object.entries(fields)) if (v !== undefined && v !== null) fd.append(k, String(v))
-    const res = await fetch(`${SITE}/api/photo-check`, { method: 'POST', body: fd, headers: { 'X-Beerfy-Install': await getInstallId() } })
-    const json = (await res.json().catch(() => null)) as PhotoResult | null
+    const json = await postPhoto<PhotoResult>('/api/photo-check', photo, fields)
     return json ?? { ok: false, message: 'No hemos podido enviar la foto. Inténtalo de nuevo.' }
   } catch {
     return { ok: false, message: 'Sin conexión. Comprueba tu cobertura e inténtalo de nuevo.' }
@@ -61,13 +61,7 @@ export async function sendRatingPhoto(
   fields: { rating_id: string; token: string; kind: 'servida' | 'encaje'; taken_at: number }
 ): Promise<{ ok: boolean; message: string }> {
   try {
-    const uri = await shrink(photo)
-    const fd = new FormData()
-    if (Platform.OS === 'web') fd.append('photo', await (await fetch(uri)).blob(), `${fields.kind}.jpg`)
-    else fd.append('photo', { uri, name: `${fields.kind}.jpg`, type: 'image/jpeg' } as unknown as Blob)
-    for (const [k, v] of Object.entries(fields)) fd.append(k, String(v))
-    const res = await fetch(`${SITE}/api/rating-photo`, { method: 'POST', body: fd, headers: { 'X-Beerfy-Install': await getInstallId() } })
-    const json = (await res.json().catch(() => null)) as { ok: boolean; message: string } | null
+    const json = await postPhoto<{ ok: boolean; message: string }>('/api/rating-photo', photo, fields)
     return json ?? { ok: false, message: 'No hemos podido enviar la foto.' }
   } catch {
     return { ok: false, message: 'Sin conexión. Inténtalo de nuevo.' }
