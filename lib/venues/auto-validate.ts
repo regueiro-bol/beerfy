@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { searchPlaces, getPlaceDetails, type PlaceSearchResult } from '@/lib/google/places'
 import { geocodeAddress } from '@/lib/geo/nominatim'
+import { getPlaceHours } from '@/lib/google/place-live'
 
 /**
  * Validación automática de sugerencias contra Google Places.
@@ -117,6 +118,11 @@ export async function publishVenueFromPlace(opts: {
   }).select('id').single()
   if (error) throw new Error(error.message)
   if (opts.servesBodega && inserted) await linkDefaultBeer(inserted.id)
+  // Horario desde el primer momento (si no, la app no sabe si está abierto hasta el cron nocturno).
+  if (inserted) {
+    const h = await getPlaceHours(opts.placeId).catch(() => null)
+    if (h) await supabase.from('venues').update({ opening_periods: h.periods, opening_hours_updated_at: now }).eq('id', inserted.id)
+  }
   return { created: true as const, slug }
 }
 
