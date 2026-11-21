@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Location from 'expo-location'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { AppState } from 'react-native'
 import { fetchData, loadCachedData, type AppData, type Venue } from './api'
 import { distanceM } from './format'
 import { hoursStatus, madridMinuteOfWeek, type HoursStatus } from './hours'
@@ -77,10 +78,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
       if (s) setSaved(JSON.parse(s) as string[])
       setAgeOk(age === '1')
+      lastRefresh.current = Date.now()
       refresh()
       locate(false)
     })()
   }, [refresh, locate])
+
+  // Al volver a la app (desde segundo plano) se actualiza la guía, como mucho cada 5 minutos.
+  const lastRefresh = useRef(0)
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s !== 'active' || Date.now() - lastRefresh.current < 5 * 60 * 1000) return
+      lastRefresh.current = Date.now()
+      refresh()
+    })
+    return () => sub.remove()
+  }, [refresh])
 
   const toggleSaved = useCallback((id: string) => {
     setSaved((prev) => {
