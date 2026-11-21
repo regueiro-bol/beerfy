@@ -16,7 +16,9 @@ export default function Home() {
   // Con horario conocido, primero los abiertos: «Abiertos ahora cerca de ti».
   const known = all.some((v) => v.status)
   const openNow = all.filter((v) => v.status?.open)
-  const top = (me ? openNow[0] : undefined) ?? all[0]
+  // La más cercana que no sabemos cerrada: un bar sin horario cargado no se salta.
+  const notClosed = all.filter((v) => !v.status || v.status.open)
+  const top = (me ? notClosed[0] : undefined) ?? all[0]
   const rest = (me && openNow.length ? openNow : all).filter((v) => v.id !== top?.id).slice(0, 5)
   const listTitle = me ? (openNow.length ? 'Abiertos ahora cerca de ti' : 'Cerca de ti') : 'Los mejor puntuados'
 
