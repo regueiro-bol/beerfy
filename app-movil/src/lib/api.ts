@@ -140,6 +140,7 @@ export const submitSuggestion = (body: {
   city_id?: string
   city_name?: string
   address?: string
+  beer_brand?: string
   notes?: string
   notify?: boolean
   email?: string

@@ -15,6 +15,7 @@ export async function submitSuggestion(_prev: SuggestState, formData: FormData):
     cityName: str(formData.get('city_name')),
     address: str(formData.get('address')),
     notes: str(formData.get('notes')),
+    brand: str(formData.get('beer_brand')),
     notify: formData.get('notify') === 'on',
     email: str(formData.get('email')),
   })

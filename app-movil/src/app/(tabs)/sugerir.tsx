@@ -8,6 +8,12 @@ import { pickPhoto, sendTankPhoto } from '@/lib/photo'
 import { useStore } from '@/lib/store'
 import { C, F } from '@/lib/theme'
 
+const BRANDS = [
+  { key: 'estrella-galicia', label: 'Estrella Galicia' },
+  { key: 'mahou', label: 'Mahou' },
+  { key: 'el-aguila', label: 'El Águila' },
+]
+
 /** Sugerir un bar: mismo formulario y misma validación automática que la web. */
 export default function Sugerir() {
   const { data } = useStore()
@@ -15,6 +21,7 @@ export default function Sugerir() {
   const [cityId, setCityId] = useState<string>('')
   const [cityName, setCityName] = useState('')
   const [address, setAddress] = useState('')
+  const [brand, setBrand] = useState('')
   const [notes, setNotes] = useState('')
   const [notify, setNotify] = useState(false)
   const [email, setEmail] = useState('')
@@ -32,6 +39,7 @@ export default function Sugerir() {
     setCityId('')
     setCityName('')
     setAddress('')
+    setBrand('')
     setNotes('')
     setNotify(false)
     setEmail('')
@@ -62,6 +70,7 @@ export default function Sugerir() {
       city_id: cityId || undefined,
       city_name: cityId === 'otra' ? cityName : undefined,
       address,
+      beer_brand: brand,
       notes,
       notify,
       email: notify ? email : undefined,
@@ -108,23 +117,23 @@ export default function Sugerir() {
     )
   }
 
-  const chip = (id: string, label: string) => (
+  const chip = (id: string, label: string, value = cityId, set: (v: string) => void = setCityId) => (
     <Pressable
       key={id}
       accessibilityRole="radio"
-      accessibilityState={{ checked: cityId === id }}
-      onPress={() => setCityId(id)}
+      accessibilityState={{ checked: value === id }}
+      onPress={() => set(id)}
       style={{
         minHeight: 44,
         paddingHorizontal: 14,
         borderRadius: 22,
         justifyContent: 'center',
-        backgroundColor: cityId === id ? C.ink : C.white,
+        backgroundColor: value === id ? C.ink : C.white,
         borderWidth: 1.5,
-        borderColor: cityId === id ? C.ink : C.line,
+        borderColor: value === id ? C.ink : C.line,
       }}
     >
-      <Text style={{ fontFamily: F.semibold, fontSize: 14, color: cityId === id ? C.cream : C.ink }}>{label}</Text>
+      <Text style={{ fontFamily: F.semibold, fontSize: 14, color: value === id ? C.cream : C.ink }}>{label}</Text>
     </Pressable>
   )
 
@@ -134,7 +143,7 @@ export default function Sugerir() {
         <ScrollView contentContainerStyle={{ padding: 20, gap: 18, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
           <View style={{ gap: 6 }}>
             <H1>Sugerir un bar</H1>
-            <Body>Cuéntanos qué bar sirve cerveza de bodega y por qué merece estar en la guía. Lo revisamos antes de publicarlo.</Body>
+            <Body>Cuéntanos qué bar sirve cerveza de bodega y por qué merece estar en la guía. Si lo encontramos en el mapa, se publica al momento.</Body>
           </View>
 
           <View>
@@ -153,6 +162,13 @@ export default function Sugerir() {
             {cityId === 'otra' ? (
               <TextInput accessibilityLabel="Nombre de la ciudad" value={cityName} onChangeText={setCityName} maxLength={80} style={s.input} placeholder="¿En qué ciudad está?" placeholderTextColor={C.sand} />
             ) : null}
+          </View>
+
+          <View style={{ gap: 8 }}>
+            <Text style={s.label}>¿De qué marca son los tanques?</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }} accessibilityRole="radiogroup">
+              {BRANDS.map((b) => chip(b.key, b.label, brand, setBrand))}
+            </View>
           </View>
 
           <View>
@@ -202,7 +218,7 @@ export default function Sugerir() {
           ) : null}
 
           {error ? <Text style={{ fontFamily: F.semibold, fontSize: 14, color: C.error }}>{error}</Text> : null}
-          <Button label="Enviar sugerencia" onPress={send} loading={sending} disabled={name.trim().length < 2 || !cityId} />
+          <Button label="Enviar sugerencia" onPress={send} loading={sending} disabled={name.trim().length < 2 || !cityId || !brand} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import { publishVenueFromPlace } from '@/lib/venues/auto-validate'
+import { brandOf } from '@/lib/beers/brands'
 
 /**
  * Publica un bar a partir de una sugerencia y del lugar de Google elegido por el admin.
@@ -13,7 +14,7 @@ export async function publishFromSuggestion(formData: FormData) {
   const suggestionId = String(formData.get('suggestion_id') || '')
   const placeId = String(formData.get('place_id') || '')
   const name = String(formData.get('name') || '').trim()
-  const servesBodega = formData.get('serves_eg_bodega') === 'on'
+  const brand = brandOf(formData.get('beer_brand'))
   if (!suggestionId || !placeId || !name) throw new Error('Faltan datos')
 
   const supabase = createServiceClient()
@@ -21,7 +22,7 @@ export async function publishFromSuggestion(formData: FormData) {
   if (sErr || !sug) throw new Error('Sugerencia no encontrada')
   if (!sug.city_id) throw new Error('La sugerencia no tiene una ciudad de la guía; créala antes o usa el asistente.')
 
-  const pub = await publishVenueFromPlace({ cityId: sug.city_id, placeId, name, servesBodega, fallbackAddress: sug.address })
+  const pub = await publishVenueFromPlace({ cityId: sug.city_id, placeId, name, servesBodega: true, brand: brand ?? brandOf(sug.beer_brand), fallbackAddress: sug.address })
   const now = new Date().toISOString()
   await supabase
     .from('venue_suggestions')

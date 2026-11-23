@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { autoValidateSuggestion } from '@/lib/venues/auto-validate'
+import { brandOf } from '@/lib/beers/brands'
 
 /** Lógica común para sugerir un bar (web y app). */
 
@@ -9,6 +10,7 @@ export type SuggestInput = {
   cityName?: string
   address?: string
   notes?: string
+  brand?: string
   notify?: boolean
   email?: string
 }
@@ -25,6 +27,7 @@ export async function saveSuggestion(input: SuggestInput): Promise<SuggestResult
   const notes = cut(input.notes, 1000)
   const notify = input.notify === true
   const email = cut(input.email, 160)
+  const brand = brandOf(input.brand)
 
   if (venueName.length < 2) return { ok: false, error: 'Indica el nombre del bar.' }
   if (!cityId && !cityFree) return { ok: false, error: 'Indica la ciudad.' }
@@ -41,6 +44,7 @@ export async function saveSuggestion(input: SuggestInput): Promise<SuggestResult
       city_name_freetext: cityId === 'otra' || !cityId ? cityFree : null,
       address: address || null,
       notes: notes || null,
+      beer_brand: brand,
       // Solo guardamos el email si la persona pide expresamente que la avisemos.
       submitter_email: notify ? email : null,
       notify_when_published: notify,
