@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from 'react'
 import { track } from '@/lib/analytics'
 import { shrink } from '@/lib/client/shrink-image'
+import { BRANDS } from '@/lib/beers/brands'
 import { submitSuggestion, type SuggestState } from './actions'
 
 type City = { id: string; name: string; slug: string }
@@ -25,7 +26,7 @@ export function SuggestForm({ cities, defaultCity }: { cities: City[]; defaultCi
       <div className="flex flex-col gap-5">
         <div className="rounded-[28px] bg-bottle p-8 text-cream">
           <p className="font-display text-[36px] font-extrabold leading-tight">¡Gracias! Sugerencia recibida.</p>
-          <p className="mt-3 text-lg text-sand">La revisaremos antes de publicar el bar. Si nos dejaste tu email, te avisaremos.</p>
+          <p className="mt-3 text-lg text-sand">Si lo encontramos en el mapa, se publica al momento; si no, lo revisamos a mano. Si nos dejaste tu email, te avisaremos.</p>
         </div>
         {state.id ? <SuggestionPhoto suggestionId={state.id} /> : null}
       </div>
@@ -65,6 +66,21 @@ export function SuggestForm({ cities, defaultCity }: { cities: City[]; defaultCi
           <input id="city_name" name="city_name" maxLength={80} className={field} />
         </div>
       )}
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 font-display text-lg font-bold">¿De qué marca son los tanques?</legend>
+        <div className="flex flex-wrap gap-2">
+          {BRANDS.map((b, i) => (
+            <label
+              key={b.key}
+              className="flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border-[1.5px] border-[#CFC9BC] bg-white px-4 font-semibold has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-cream"
+            >
+              <input type="radio" name="beer_brand" value={b.key} required={i === 0} className="sr-only" />
+              {b.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <div className="flex flex-col gap-2">
         <label htmlFor="address" className="font-display text-lg font-bold">

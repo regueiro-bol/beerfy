@@ -63,7 +63,7 @@ export async function GET() {
         coverCredit: covers[v.id]?.google?.author ?? null,
         score: scores[v.id]?.score ?? null,
         votes: scores[v.id]?.votes ?? 0,
-        beers: beers[v.id] ?? ['Estrella Galicia de Bodega'],
+        beers: beers[v.id] ?? ['Estrella Galicia'],
         publishedAt: v.published_at,
         hours: v.opening_periods ?? null,
       })),

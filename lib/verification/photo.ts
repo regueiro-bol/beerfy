@@ -112,8 +112,10 @@ export async function analyzeTankPhoto(jpeg: Buffer, context: string, targetId?:
 /** Qué cerveza de la base corresponde a lo que se lee en la foto. */
 function matchBeerSlug(ai: PhotoAi): string | null {
   const p = `${ai.producto} ${ai.marca}`.toLowerCase()
-  if (p.includes('1906')) return '1906-de-bodega'
-  if (ai.marca === 'Estrella Galicia' || p.includes('estrella')) return 'estrella-galicia-de-bodega'
+  // Solo marca: 1906 es Estrella Galicia.
+  if (ai.marca === 'Estrella Galicia' || p.includes('estrella') || p.includes('1906')) return 'estrella-galicia-de-bodega'
+  if (ai.marca === 'Mahou' || p.includes('mahou')) return 'bodega-mahou'
+  if (p.includes('águila') || p.includes('aguila')) return 'el-aguila-dorada'
   return null
 }
 

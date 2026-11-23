@@ -2,6 +2,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { searchPlaces, getPlaceDetails, type PlaceSearchResult } from '@/lib/google/places'
 import { geocodeAddress } from '@/lib/geo/nominatim'
 import { getPlaceHours } from '@/lib/google/place-live'
+import { beerSlugOf, type BrandKey } from '@/lib/beers/brands'
 
 /**
  * Validación automática de sugerencias contra Google Places.
@@ -47,10 +48,10 @@ function slugify(text: string) {
 }
 
 
-/** Enlaza un bar a Estrella Galicia de Bodega en tanque (cerveza por defecto mientras el alta no pregunta la cerveza). */
-async function linkDefaultBeer(venueId: string) {
+/** Enlaza un bar a la cerveza de tanque de su marca (Estrella Galicia si no se indicó). */
+async function linkBrandBeer(venueId: string, brand?: BrandKey | null) {
   const supabase = createServiceClient()
-  const { data: beer } = await supabase.from('beers').select('id').eq('slug', 'estrella-galicia-de-bodega').maybeSingle()
+  const { data: beer } = await supabase.from('beers').select('id').eq('slug', beerSlugOf(brand)).maybeSingle()
   if (beer) await supabase.from('venue_beers').upsert({ venue_id: venueId, beer_id: beer.id, source: 'equipo' }, { onConflict: 'venue_id,beer_id' })
 }
 
@@ -60,6 +61,7 @@ export async function publishVenueFromPlace(opts: {
   placeId: string
   name: string
   servesBodega: boolean
+  brand?: BrandKey | null
   fallbackAddress?: string | null
   /** Ficha provisional (sin place_id) que hay que completar en lugar de crear otra. */
   provisionalSlug?: string
@@ -112,12 +114,12 @@ export async function publishVenueFromPlace(opts: {
     longitude: place.location.lng || null,
     coords_source: 'google',
     coords_updated_at: now,
-    serves_eg_bodega: opts.servesBodega,
+    serves_eg_bodega: opts.servesBodega && (!opts.brand || opts.brand === 'estrella-galicia'),
     status: 'published',
     published_at: now,
   }).select('id').single()
   if (error) throw new Error(error.message)
-  if (opts.servesBodega && inserted) await linkDefaultBeer(inserted.id)
+  if (opts.servesBodega && inserted) await linkBrandBeer(inserted.id, opts.brand)
   // Horario desde el primer momento (si no, la app no sabe si está abierto hasta el cron nocturno).
   if (inserted) {
     const h = await getPlaceHours(opts.placeId).catch(() => null)
@@ -132,7 +134,7 @@ export async function autoValidateSuggestion(suggestionId: string): Promise<Auto
   const supabase = createServiceClient()
   const { data: s } = await supabase
     .from('venue_suggestions')
-    .select('id, venue_name, address, city_id, status, cities(name, slug, latitude, longitude)')
+    .select('id, venue_name, address, city_id, status, beer_brand, cities(name, slug, latitude, longitude)')
     .eq('id', suggestionId)
     .single()
   if (!s) return { id: suggestionId, name: '?', result: 'pending', detail: 'No encontrada' }
@@ -169,6 +171,7 @@ export async function autoValidateSuggestion(suggestionId: string): Promise<Auto
     placeId: top.id,
     name: top.name || s.venue_name,
     servesBodega: true,
+    brand: (s.beer_brand as BrandKey | null) ?? null,
     fallbackAddress: s.address,
     provisionalSlug: slugify(s.venue_name),
   })
@@ -200,7 +203,7 @@ export async function publishProvisional(suggestionId: string): Promise<AutoResu
   const supabase = createServiceClient()
   const { data: s } = await supabase
     .from('venue_suggestions')
-    .select('id, venue_name, address, city_id, status, cities(name, slug)')
+    .select('id, venue_name, address, city_id, status, beer_brand, cities(name, slug)')
     .eq('id', suggestionId)
     .single()
   if (!s || s.status !== 'pending' || !s.city_id) return { id: suggestionId, name: s?.venue_name ?? '?', result: 'pending', detail: 'No apta' }
@@ -235,12 +238,12 @@ export async function publishProvisional(suggestionId: string): Promise<AutoResu
     longitude: geo?.lng ?? null,
     coords_source: 'manual',
     coords_updated_at: geo ? now : null,
-    serves_eg_bodega: true,
+    serves_eg_bodega: !s.beer_brand || s.beer_brand === 'estrella-galicia',
     status: 'published',
     published_at: now,
   }).select('id').single()
   if (error) return { id: s.id, name: s.venue_name, result: 'pending', detail: error.message }
-  if (inserted) await linkDefaultBeer(inserted.id)
+  if (inserted) await linkBrandBeer(inserted.id, (s.beer_brand as BrandKey | null) ?? null)
   await supabase
     .from('venue_suggestions')
     .update({ ai_notes: `Ficha provisional publicada (coordenadas OSM: ${geo ? geo.label : 'sin geocodificar'}). Pendiente de Google.` })

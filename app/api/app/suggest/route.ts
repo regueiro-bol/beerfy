@@ -15,6 +15,7 @@ export async function POST(req: Request) {
     cityName: s('city_name'),
     address: s('address'),
     notes: s('notes'),
+    brand: s('beer_brand'),
     notify: body.notify === true,
     email: s('email'),
   })

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BRANDS } from '@/lib/beers/brands'
 import { createServiceClient } from '@/lib/supabase/service'
 import { searchPlaces, type PlaceSearchResult } from '@/lib/google/places'
 import { publishFromSuggestion, rejectSuggestion } from './actions'
@@ -12,6 +13,7 @@ type Suggestion = {
   notes: string | null
   city_id: string | null
   city_name_freetext: string | null
+  beer_brand: string | null
   created_at: string
   cities: { name: string; slug: string } | null
 }
@@ -20,7 +22,7 @@ export default async function SuggestionsAdminPage() {
   const supabase = createServiceClient()
   const { data } = await supabase
     .from('venue_suggestions')
-    .select('id, venue_name, address, notes, city_id, city_name_freetext, created_at, cities(name, slug)')
+    .select('id, venue_name, address, notes, city_id, city_name_freetext, beer_brand, created_at, cities(name, slug)')
     .eq('status', 'pending')
     .order('created_at', { ascending: true })
   const suggestions = (data || []) as unknown as Suggestion[]
@@ -98,8 +100,15 @@ export default async function SuggestionsAdminPage() {
                     Nombre en Beerfy
                     <input name="name" defaultValue={p.name || s.venue_name} className="mt-1 rounded-md border px-2 py-1 text-sm" />
                   </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="serves_eg_bodega" defaultChecked /> EG de Bodega
+                  <label className="flex flex-col text-xs">
+                    Marca del tanque
+                    <select name="beer_brand" defaultValue={s.beer_brand ?? 'estrella-galicia'} className="mt-1 rounded-md border px-2 py-1 text-sm">
+                      {BRANDS.map((b) => (
+                        <option key={b.key} value={b.key}>
+                          {b.label}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <button disabled={!s.city_id} className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">
                     Publicar este
